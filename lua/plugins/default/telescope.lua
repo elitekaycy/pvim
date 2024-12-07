@@ -12,7 +12,6 @@ return {
 		require("telescope").setup({
 			extensions = {
 				lsp_actions = {
-					-- Any configuration specific to lsp_actions can go here
 				},
 			},
 			defaults = {

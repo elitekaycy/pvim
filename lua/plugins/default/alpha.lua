@@ -1,7 +1,7 @@
 return {
 	"goolord/alpha-nvim",
 	dependencies = {
-		"nvim-tree/nvim-web-devicons", -- For icons in the dashboard
+		"nvim-tree/nvim-web-devicons",
 	},
 	config = function()
 		local alpha = require("alpha")
@@ -53,7 +53,6 @@ return {
 			"                                        ***++==-::::::-=+++#                                        ",
 		}
 
-		-- Buttons
 		dashboard.section.buttons.val = {
 			dashboard.button("e", "📂  New file", ":ene <BAR> startinsert <CR>"),
 			dashboard.button("f", "🔍  Find file", ":Telescope find_files <CR>"),
@@ -62,10 +61,7 @@ return {
 			dashboard.button("q", "❌  Quit", ":qa<CR>"),
 		}
 
-		-- Footer
 		dashboard.section.footer.val = "🚀 Happy Coding!"
-
-		-- Setup alpha
 		alpha.setup(dashboard.config)
 	end,
 }

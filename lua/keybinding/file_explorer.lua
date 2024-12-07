@@ -1,4 +1,3 @@
--- Keybinding setup
 vim.keymap.set(
 	"n",
 	"<leader>e",
@@ -6,11 +5,9 @@ vim.keymap.set(
 	{ noremap = true, silent = true, desc = "Toggle File Explorer" }
 )
 
--- Automatically focus on nvim-tree when opened and defocus when closed
-vim.cmd([[autocmd BufWinEnter NvimTree_* silent! NvimTreeFocus]]) -- Focus on tree when opening
-vim.cmd([[autocmd BufWinLeave NvimTree_* silent! NvimTreeClose]]) -- Close and defocus when leaving
+vim.cmd([[autocmd BufWinEnter NvimTree_* silent! NvimTreeFocus]])
+vim.cmd([[autocmd BufWinLeave NvimTree_* silent! NvimTreeClose]])
 
--- Open file in a new buffer window
 vim.keymap.set(
 	"n",
 	"<CR>",

@@ -3,10 +3,10 @@ return {
 		"windwp/nvim-autopairs",
 		config = function()
 			require("nvim-autopairs").setup({
-				check_ts = true, -- Enable Tree-sitter integration
-				disable_filetype = { "TelescopePrompt", "vim" }, -- Disable in specific filetypes
+				check_ts = true,
+				disable_filetype = { "TelescopePrompt", "vim" },
 				fast_wrap = {
-					map = "<M-e>", -- Keybinding to wrap existing text
+					map = "<M-e>",
 					chars = { "{", "[", "(", '"', "'" },
 					pattern = [=[[%'%"%>%]%)%}%,]]=],
 					end_key = "$",

@@ -33,7 +33,6 @@ return {
 			show_success_message = true,
 		})
 
-		-- keybinding for refactor nvim
 		vim.keymap.set("x", "<leader>rf", function()
 			require("refactoring").refactor("Extract Function To File")
 		end)

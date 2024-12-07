@@ -11,9 +11,9 @@ return {
 
 		require("mason-lspconfig").setup({
 			ensure_installed = {
-				"jdtls", -- Java language server
-				"lua_ls", -- Example: Lua language server
-				"ts_ls", -- Example: TypeScript language server
+				"jdtls",
+				"lua_ls",
+				"ts_ls",
 			},
 			automatic_installation = true,
 		})

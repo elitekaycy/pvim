@@ -5,7 +5,6 @@ local function load_plugin_inits()
 	for _, dir in ipairs(vim.fn.readdir(vim.fn.stdpath("config") .. "/lua/" .. plugin_base_dir)) do
 		local full_path = plugin_base_dir .. "." .. dir .. ".init"
 
-		-- Check if init file exists before requiring
 		local ok, init_module = pcall(require, full_path)
 		if ok then
 			vim.list_extend(plugins, init_module)
