@@ -3,7 +3,12 @@ return {
 	main = "ibl",
 	opts = {},
 	config = function()
-		local highlight = {
+
+        local highlight = {
+            "CursorColumn",
+            "Whitespace",
+        }
+		local highlightRainbow = {
 			"RainbowRed",
 			"RainbowYellow",
 			"RainbowBlue",
@@ -25,7 +30,17 @@ return {
 		end)
 
 		require("ibl").setup({
-			indent = { highlight = highlight },
+
+             indent = { highlight = highlight, char = "" },
+             whitespace = {
+              highlight = highlight,
+              remove_blankline_trail = false,
+          },
+          scope = { highlight = highlightRainbow },
+
 		})
+        hooks.register(hooks.type.SCOPE_HIGHLIGHT, hooks.builtin.scope_highlight_from_extmark)
 	end,
 }
+
+

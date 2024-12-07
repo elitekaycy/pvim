@@ -13,7 +13,7 @@ return {
 			},
 
 			view = {
-				side = "right",
+				side = "left",
 				width = 30,
 				centralize_selection = false,
 				cursorline = true,
