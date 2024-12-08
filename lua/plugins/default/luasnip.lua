@@ -2,6 +2,7 @@ return {
 	"saadparwaiz1/cmp_luasnip",
 	dependencies = {
 		"L3MON4D3/LuaSnip",
+        "rafamadriz/friendly-snippets"
 	},
 	config = function()
 		local ls = require("luasnip")
