@@ -10,6 +10,7 @@ return {
                 typescript = { "prettier" },
                 javascriptreact = { "prettier" },
                 typescriptreact = { "prettier" },
+                ftl = { 'prettier' },
                 java = {
                     'google-java-format',
                 },
