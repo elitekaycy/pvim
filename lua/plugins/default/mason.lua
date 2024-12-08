@@ -20,6 +20,7 @@ return {
         require('mason-nvim-lint').setup({
             ensure_installed = {
                 'eslint',
+                'eslint_d',
                 'golangci-lint',
                 'checkstyle',
                 'shellcheck',
