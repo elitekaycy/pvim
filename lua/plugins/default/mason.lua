@@ -10,6 +10,7 @@ return {
 
         require("mason-lspconfig").setup({
             ensure_installed = {
+                "html",
                 "jdtls",
                 "lua_ls",
                 "ts_ls",
@@ -19,7 +20,6 @@ return {
 
         require('mason-nvim-lint').setup({
             ensure_installed = {
-                'eslint',
                 'eslint_d',
                 'golangci-lint',
                 'checkstyle',
