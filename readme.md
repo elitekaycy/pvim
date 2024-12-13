@@ -8,14 +8,20 @@
   nvim --version
   ```
 
+*** Still a WIP(work in progress) ***
+
+![sample img png](./docs/ss.png)
+
 # Setup Instructions
+
+##### -> NB. Follow this way to not affect your actual nvim config
 
 #### 1. Clone the pvim repository
 
 Clone the pvim repository into the ~/.config directory by running the following command:
 
 ```
-git clone <repository_url> ~/.config/pvim
+git clone https://github.com/elitekaycy/pvim.git ~/.config/pvim
 ```
 
 Replace <repository_url> with the actual URL of the pvim repository.
