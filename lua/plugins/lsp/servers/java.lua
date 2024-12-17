@@ -8,7 +8,8 @@ local jdtls_path     = mason_registry.get_package("jdtls"):get_install_path()
 local lombok_jar     = jdtls_path .. "/lombok.jar"
 local launcher_jar   = vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
 local config_dir     = jdtls_path .. "/config_linux"
-local workspace_dir  = vim.fn.stdpath("data") .. "/jdtls/workspace/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+local workspace_dir  = vim.fn.stdpath("data") ..
+    "/jdtls/workspace/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 
 local function setup_jdtls()
     local config = {
@@ -33,6 +34,11 @@ local function setup_jdtls()
         },
         capabilities = capabilities,
         root_dir = jdtls.setup.find_root({ ".git", "mvnw", "gradlew", "pom.xml", "build.gradle" }),
+        on_attach = function()
+            require("jdtls").setup_dap { hotcodereplace = "auto" }
+            require("jdtls.dap").setup_dap_main_class_configs()
+            require("jtdtls").add_commands()
+        end,
         settings = {
             java = {
                 eclipse = {
@@ -52,7 +58,9 @@ local function setup_jdtls()
             },
         },
         init_options = {
-            bundles = {},
+            bundles = {
+                -- java_debug_adapter_path
+            },
         },
     }
 
@@ -94,6 +102,8 @@ local function setup_jdtls()
         "<Esc><Cmd>lua require('jdtls').extract_constant(true)<CR>",
         { buffer = 0, desc = "Extract Constant" }
     )
+    vim.keymap.set('n', '<leader>jt', jdtls.test_nearest_method, config)
+    vim.keymap.set('n', '<leader>jT', jdtls.test_class, config)
 end
 
 vim.api.nvim_create_autocmd("FileType", {
