@@ -1,12 +1,12 @@
-local dap            = require('dap')
-local mason_registry = require("mason-registry")
+local dap = require('dap')
+-- local mason_registry = require("mason-registry")
 
 -- local java_debug_adapter_path =
 --     mason_registry.get_package('java-debug-adapter')
 --     :get_install_path()
 
-local java_test_path = mason_registry.get_package("java-test"):get_install_path()
-local jdtls_path     = mason_registry.get_package("jdtls"):get_install_path()
+-- local java_test_path = mason_registry.get_package("java-test"):get_install_path()
+-- local jdtls_path     = mason_registry.get_package("jdtls"):get_install_path()
 
 
 dap.adapters.java = function(callback)

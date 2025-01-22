@@ -2,7 +2,7 @@ local capabilities   = require("cmp_nvim_lsp").default_capabilities()
 local jdtls          = require("jdtls")
 -- local handlers = require("plugins.lsp.handlers")
 local mason_registry = require("mason-registry")
-local codelens       = require("utils.codelens")
+-- local codelens       = require("utils.codelens")
 
 local jdtls_path     = mason_registry.get_package("jdtls"):get_install_path()
 local lombok_jar     = jdtls_path .. "/lombok.jar"
