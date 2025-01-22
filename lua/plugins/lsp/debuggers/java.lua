@@ -1,5 +1,5 @@
-local dap            = require('dap')
-local mason_registry = require("mason-registry")
+local dap = require('dap')
+-- local mason_registry = require("mason-registry")
 
 -- local java_debug_adapter_path =
 --     mason_registry.get_package('java-debug-adapter')
