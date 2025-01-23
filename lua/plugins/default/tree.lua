@@ -7,6 +7,8 @@ return {
         require("nvim-tree").setup({
             disable_netrw = true,
             hijack_netrw = true,
+            auto_reload_on_write = true,
+            reload_on_bufenter = true,
             hijack_unnamed_buffer_when_opening = false,
             update_focused_file = {
                 enable = false,
@@ -14,21 +16,61 @@ return {
 
             view = {
                 side = "left",
-                width = 30,
+                preserve_window_proportions = false,
+                width = {
+                    min = 30,
+                    max = 60,
+                    padding = 1
+                },
                 centralize_selection = false,
                 cursorline = true,
                 number = false,
                 relativenumber = false,
                 signcolumn = "yes",
                 float = {
-                    enable = false,
+                    enable = true,
+                    quit_on_focus_loss = true,
+                    open_win_config = function()
+                        local screen_h = vim.opt.lines:get()
+                        return {
+                            relative = "editor",
+                            border = "rounded",
+                            width = 30,
+                            height = screen_h - 4,
+                            row = 1,
+                            col = 1,
+                        }
+                    end,
+
                 },
             },
 
             renderer = {
                 highlight_git = true,
+                add_trailing = false,
                 highlight_opened_files = "all",
+                indent_markers = {
+                    enable = true,
+                    inline_arrows = true,
+                    icons = {
+                        corner = "└",
+                        edge = "│",
+                        item = "│",
+                        bottom = "─",
+                        none = " ",
+                    },
+                },
                 icons = {
+                    web_devicons = {
+                        file = {
+                            enable = true,
+                            color = true,
+                        },
+                        folder = {
+                            enable = false,
+                            color = true,
+                        },
+                    },
                     show = {
                         file = true,
                         folder = true,
@@ -36,7 +78,7 @@ return {
                         git = true,
                         modified = true,
                         hidden = true,
-                        diagnostics = true,
+                        diagnostics = false,
                         bookmarks = true,
                     },
                     glyphs = {
@@ -46,7 +88,7 @@ return {
                         modified = "●",
                         hidden = "󰜌",
                         folder = {
-                            arrow_closed = "",
+                            arrow_closed = ">",
                             arrow_open = "",
                             default = "",
                             open = "",
@@ -110,6 +152,30 @@ return {
                 git_ignored = true,
                 dotfiles = false,
             },
+
+
         })
+
+        local function set_highlight(group, properties)
+            vim.api.nvim_set_hl(0, group, properties)
+        end
+
+        set_highlight("NvimTreeNormal", { bg = "#1e1e2e" })
+        set_highlight("NvimTreeNormalNC", { bg = "#1e1e2e" })
+
+        set_highlight("NvimTreeWindowPicker", { fg = "#ffffff", bg = "#5e81ac", bold = true })
+
+        set_highlight("NvimTreeGitDirty", { fg = "#d08770", bold = true })
+        set_highlight("NvimTreeGitNew", { fg = "#a3be8c", bold = true })
+        set_highlight("NvimTreeGitDeleted", { fg = "#bf616a", bold = true })
+
+        set_highlight("NvimTreeFolderIcon", { fg = "#81a1c1" })
+        set_highlight("NvimTreeFileIcon", { fg = "#88c0d0" })
+        set_highlight("NvimTreeRootFolder", { fg = "#88c0d0", bold = true })
+
+        set_highlight("NvimTreeDiagnosticError", { fg = "#bf616a" })
+        set_highlight("NvimTreeDiagnosticWarn", { fg = "#ebcb8b" })
+        set_highlight("NvimTreeDiagnosticInfo", { fg = "#88c0d0" })
+        set_highlight("NvimTreeDiagnosticHint", { fg = "#5e81ac" })
     end,
 }
