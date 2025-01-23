@@ -1,15 +1,16 @@
-local capabilities   = require("cmp_nvim_lsp").default_capabilities()
-local jdtls          = require("jdtls")
+local capabilities     = require("cmp_nvim_lsp").default_capabilities()
+local jdtls            = require("jdtls")
 -- local handlers = require("plugins.lsp.handlers")
-local mason_registry = require("mason-registry")
+local mason_registry   = require("mason-registry")
 -- local codelens       = require("utils.codelens")
 
-local jdtls_path     = mason_registry.get_package("jdtls"):get_install_path()
-local lombok_jar     = jdtls_path .. "/lombok.jar"
-local launcher_jar   = vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
-local config_dir     = jdtls_path .. "/config_linux"
-local workspace_dir  = vim.fn.stdpath("data") ..
+local jdtls_path       = mason_registry.get_package("jdtls"):get_install_path()
+local lombok_jar       = jdtls_path .. "/lombok.jar"
+local launcher_jar     = vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
+local config_dir       = jdtls_path .. "/config_linux"
+local workspace_dir    = vim.fn.stdpath("data") ..
     "/jdtls/workspace/" .. vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+local ensure_lsp_ready = require("utils.lsp-utils")
 
 local function setup_jdtls()
     local config = {
@@ -34,10 +35,9 @@ local function setup_jdtls()
         },
         capabilities = capabilities,
         root_dir = jdtls.setup.find_root({ ".git", "mvnw", "gradlew", "pom.xml", "build.gradle" }),
+        --root_dir = vim.fs.dirname(vim.fs.find({ 'gradlew', '.git', 'mvnw', 'pom.xml', 'build.gradle' }, { upward = true })[1]),
         on_attach = function()
             require("jdtls").setup_dap { hotcodereplace = "auto" }
-            require("jdtls.dap").setup_dap_main_class_configs()
-            require("jtdtls").add_commands()
         end,
         settings = {
             java = {
@@ -53,7 +53,7 @@ local function setup_jdtls()
                     },
                 },
                 format = {
-                    enabled = false,
+                    enabled = true,
                 },
             },
         },
@@ -102,11 +102,16 @@ local function setup_jdtls()
         "<Esc><Cmd>lua require('jdtls').extract_constant(true)<CR>",
         { buffer = 0, desc = "Extract Constant" }
     )
-    vim.keymap.set('n', '<leader>jt', jdtls.test_nearest_method, config)
-    vim.keymap.set('n', '<leader>jT', jdtls.test_class, config)
+    --   vim.keymap.set('n', '<leader>jt', jdtls.test_nearest_method, config)
+    --    vim.keymap.set('n', '<leader>jT', jdtls.test_class, config)
 end
 
+vim.api.nvim_create_augroup("JavaLSPGroup", { clear = true })
+
 vim.api.nvim_create_autocmd("FileType", {
-    pattern = { "java" },
-    callback = setup_jdtls,
+    group = "JavaLSPGroup",
+    pattern = "java",
+    callback = function()
+        setup_jdtls()
+    end,
 })
