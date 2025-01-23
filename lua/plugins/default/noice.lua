@@ -62,12 +62,19 @@ return {
             },
             notify = {
                 enabled = true,
-                view = "notify",
+                view = "mini",   -- Compact view
                 opts = {
-                    position = "bottom",
-                    relative = "editor",
-                    align = "left",
-                },
+                    position = { -- Bottom right corner
+                        row = vim.o.lines - 4,
+                        col = vim.o.columns - 4
+                    },
+                    border = {
+                        style = "rounded", -- Rounded border
+                        padding = { 0, 1 } -- Minimal padding
+                    },
+                    timeout = 3000,        -- 3 second display
+                    render = "compact"     -- Compact rendering
+                }
             },
             views = {
                 cmdline_popup = {
