@@ -9,13 +9,23 @@ return {
             vim.g.tabby_inline_completion_trigger = "auto"
         end,
         config = function()
-            -- Essential LSP setup
             require("lspconfig").tabby.setup({
                 filetypes = {
+                    -- App languages
                     "python", "javascript", "typescript", "lua",
-                    "go", "rust", "java", "c", "cpp"
+                    "go", "rust", "java", "c", "cpp", "csharp",
+
+                    -- AWS IaC & DevOps
+                    "yaml",       -- CloudFormation, SAM, Kubernetes, Helm, CI/CD
+                    "json",       -- CloudFormation, configs
+                    "terraform",  -- Terraform
+                    "dockerfile", -- Docker
+                    "sh",         -- Shell scripts
+                    "make",       -- Makefiles
+                    "markdown"    -- Docs
                 }
             })
+
 
             -- Core keymaps only
             vim.keymap.set("i", "<Tab>", function()

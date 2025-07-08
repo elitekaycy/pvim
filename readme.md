@@ -1,4 +1,24 @@
-# pvim Setup Guide
+# pvim
+
+A personalized Neovim configuration, tailored for a streamlined and efficient development workflow.
+
+![sample img png](./docs/ss.png)
+
+## Features
+
+- **Plugin Management:** Utilizes `lazy.nvim` for efficient plugin management.
+- **File Explorer:** Integrated with `nvim-tree` for easy file navigation.
+- **Fuzzy Finding:** Powered by `telescope.nvim` for finding files, buffers, and more.
+- **LSP Integration:** Comprehensive language server protocol support with `nvim-lspconfig`.
+- **Code Completion:** Enhanced autocompletion with `nvim-cmp`.
+- **Git Integration:** Seamless git integration with `gitsigns`.
+- **UI Enhancements:** A visually appealing and informative UI with `lualine`, `bufferline`, and `noice`.
+- **Syntax Highlighting:** Advanced syntax highlighting with `nvim-treesitter`.
+- **Auto-Pairing:** Automatic bracket and quote pairing with `nvim-autopairs`.
+- **Formatting and Linting:** Code formatting with `formatter.nvim` and linting with `lint.nvim`.
+- **Debugging:** Debugging support with `nvim-dap`.
+- **Snippets:** Code snippets with `luasnip`.
+- **And much more...**
 
 ## Prerequisites
 
@@ -8,11 +28,7 @@
   nvim --version
   ```
 
-*** Still a WIP(work in progress) ***
-
-![sample img png](./docs/ss.png)
-
-# Setup Instructions
+## Setup Instructions
 
 ##### -> NB. Follow this way to not affect your actual nvim config
 
@@ -23,8 +39,6 @@ Clone the pvim repository into the ~/.config directory by running the following 
 ```
 git clone https://github.com/elitekaycy/pvim.git ~/.config/pvim
 ```
-
-Replace <repository_url> with the actual URL of the pvim repository.
 
 #### 2. Edit your .zshrc or .bashrc
 
@@ -44,7 +58,34 @@ To apply the changes, reload your shell configuration:
 ```
 source ~/.zshrc # For Zsh users
 source ~/.bashrc # For Bash users 4. Use pvim
-
 ```
 
-Now you can use the pvim command to open Neovim with your custom configuration.
+Now you can use the `pvim` command to open Neovim with your custom configuration.
+
+## Keybindings
+
+### General
+
+| Keybinding | Description |
+|---|---|
+| `<leader>e` | Toggle File Explorer |
+| `<CR>` | Open File in New Buffer |
+
+### Telescope
+
+| Keybinding | Description |
+|---|---|
+| `<leader><leader>` | Find all files |
+| `<leader>ff` | Find files |
+| `<leader>fg` | Live grep |
+| `<leader>fb` | Find buffers |
+| `<leader>fh` | Find help tags |
+
+### Buffer Navigation
+
+| Keybinding | Description |
+|---|---|
+| `<S-h>` | Previous buffer |
+| `<S-l>` | Next buffer |
+| `<S-v>` | Vsplit |
+| `<leader>bd` | Close buffer |
