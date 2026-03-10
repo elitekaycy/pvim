@@ -1,14 +1,40 @@
 local lspconfig = require("lspconfig")
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
--- local handlers = require("plugins.lsp.handlers")
 local codelens = require("utils.codelens")
+
+-- Register .ftl files as freemarker/html filetype
+vim.filetype.add({
+    extension = {
+        ftl = "ftl",
+    },
+})
+
+-- Set ftl to be treated like html for syntax highlighting
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+    pattern = "*.ftl",
+    callback = function()
+        vim.bo.filetype = "ftl"
+        -- Enable HTML-like syntax highlighting for FreeMarker
+        vim.cmd("setlocal syntax=html")
+    end,
+})
 
 lspconfig.html.setup({
     capabilities = capabilities,
-    filetypes = { 'html', 'jsp', 'ftl', 'jsp' },
-    settings = {},
+    filetypes = { "html", "jsp", "ftl", "templ", "htmldjango" },
+    settings = {
+        html = {
+            format = {
+                enable = true,
+                wrapLineLength = 120,
+            },
+            hover = {
+                documentation = true,
+                references = true,
+            },
+        },
+    },
     on_attach = function(client, bufnr)
-        print("(html/jsp/ftl..) server attached")
         codelens.on_attach(client, bufnr)
 
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = bufnr })

@@ -2,22 +2,20 @@ local lspconfig = require("lspconfig")
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local codelens = require("utils.codelens")
 
-lspconfig.tailwindcss.setup({
+lspconfig.cssls.setup({
     capabilities = capabilities,
-    filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte" },
-    root_dir = lspconfig.util.root_pattern("tailwind.config.js", "tailwind.config.ts", "tailwind.config.cjs", "tailwind.config.mjs", "postcss.config.js", "package.json"),
+    filetypes = { "css", "scss", "less" },
     settings = {
-        tailwindCSS = {
-            experimental = {
-                classRegex = {
-                    "([\\w-/:]+)",
-                    'class[:]\\s*"([^"]*)"',
-                    'className[:]\\s*"([^"]*)"',
-                },
-            },
+        css = {
+            validate = true,
             lint = {
-                cssConflict = "warning",
+                unknownAtRules = "ignore",
             },
+        },
+        scss = {
+            validate = true,
+        },
+        less = {
             validate = true,
         },
     },
