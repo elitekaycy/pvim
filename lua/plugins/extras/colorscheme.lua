@@ -191,7 +191,13 @@ local theme_plugins = {
 local function load_theme_plugin(name)
     for prefix, plugin in pairs(theme_plugins) do
         if name:find("^" .. prefix) then
-            pcall(function() require("lazy").load({ plugins = { plugin } }) end)
+            local ok = pcall(function()
+                require("lazy").load({ plugins = { plugin } })
+            end)
+            -- Give it a moment to load
+            if ok then
+                vim.wait(50, function() return false end)
+            end
             return
         end
     end
@@ -204,23 +210,35 @@ local function apply_theme(name, save)
             -- Load the plugin first (in case it's lazy loaded)
             load_theme_plugin(name)
 
-            -- Small delay to ensure plugin is loaded
-            vim.schedule(function()
-                pcall(theme.setup)
-                local ok = pcall(vim.cmd, "colorscheme " .. theme.colorscheme)
-                if ok then
-                    -- Apply transparency
-                    vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-                    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-                    -- Refresh UI
-                    vim.cmd("redraw!")
-                    if save then
-                        save_theme(name)
-                        vim.notify("Theme: " .. name, vim.log.levels.INFO)
-                    end
+            -- Run setup
+            local setup_ok = pcall(theme.setup)
+
+            -- Apply colorscheme
+            local cs_ok = pcall(vim.cmd, "colorscheme " .. theme.colorscheme)
+
+            if cs_ok then
+                -- Apply transparency settings
+                vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+                vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+                vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })
+                vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
+                vim.api.nvim_set_hl(0, "EndOfBuffer", { bg = "none" })
+
+                -- Force redraw all windows
+                for _, win in ipairs(vim.api.nvim_list_wins()) do
+                    pcall(vim.api.nvim_win_call, win, function()
+                        vim.cmd("redraw!")
+                    end)
                 end
-            end)
-            return true
+
+                if save then
+                    save_theme(name)
+                    vim.notify("Theme: " .. name, vim.log.levels.INFO)
+                end
+                return true
+            else
+                vim.notify("Failed to load theme: " .. name, vim.log.levels.WARN)
+            end
         end
     end
     return false
