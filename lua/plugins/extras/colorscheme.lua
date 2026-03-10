@@ -158,22 +158,69 @@ local function save_theme(name)
     end
 end
 
+-- Map theme names to plugin names for lazy loading
+local theme_plugins = {
+    ["kanagawa"] = "kanagawa.nvim",
+    ["tokyonight"] = "tokyonight.nvim",
+    ["catppuccin"] = "catppuccin",
+    ["gruvbox"] = "gruvbox.nvim",
+    ["onedark"] = "onedark.nvim",
+    ["rose-pine"] = "rose-pine",
+    ["nightfox"] = "nightfox.nvim",
+    ["dracula"] = "dracula.nvim",
+    ["github"] = "github-nvim-theme",
+    ["oxocarbon"] = "oxocarbon.nvim",
+    ["nord"] = "nord.nvim",
+    ["everforest"] = "everforest",
+    ["melange"] = "melange-nvim",
+    ["material"] = "material.nvim",
+    ["moonfly"] = "moonfly",
+    ["nightfly"] = "nightfly",
+    ["embark"] = "embark",
+    ["ayu"] = "neovim-ayu",
+    ["vscode"] = "vscode.nvim",
+    ["zenburn"] = "zenburn.nvim",
+    ["monokai"] = "monokai-pro.nvim",
+    ["sonokai"] = "sonokai",
+    ["poimandres"] = "poimandres.nvim",
+    ["cyberdream"] = "cyberdream.nvim",
+    ["fluoromachine"] = "fluoromachine.nvim",
+}
+
+-- Load theme plugin if lazy loaded
+local function load_theme_plugin(name)
+    for prefix, plugin in pairs(theme_plugins) do
+        if name:find("^" .. prefix) then
+            pcall(function() require("lazy").load({ plugins = { plugin } }) end)
+            return
+        end
+    end
+end
+
 -- Apply theme
 local function apply_theme(name, save)
     for _, theme in ipairs(themes) do
         if theme.name == name then
-            pcall(theme.setup)
-            local ok = pcall(vim.cmd, "colorscheme " .. theme.colorscheme)
-            if ok then
-                -- Apply transparency
-                vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-                vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-                if save then
-                    save_theme(name)
-                    vim.notify("Theme set to: " .. name, vim.log.levels.INFO)
+            -- Load the plugin first (in case it's lazy loaded)
+            load_theme_plugin(name)
+
+            -- Small delay to ensure plugin is loaded
+            vim.schedule(function()
+                pcall(theme.setup)
+                local ok = pcall(vim.cmd, "colorscheme " .. theme.colorscheme)
+                if ok then
+                    -- Apply transparency
+                    vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+                    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+                    -- Refresh UI
+                    vim.cmd("redraw!")
+                    if save then
+                        save_theme(name)
+                        vim.notify("Theme: " .. name, vim.log.levels.INFO)
+                    end
                 end
-                return true
-            end
+            end)
+            return true
         end
     end
     return false
