@@ -1,0 +1,71 @@
+{
+  "spring_datasource": {
+    "prefix": "spring_datasource",
+    "description": "Spring datasource configuration",
+    "body": [
+      "# Database",
+      "spring.datasource.url=jdbc:${1|postgresql,mysql,h2|}://${2:localhost}:${3:5432}/${4:database}",
+      "spring.datasource.username=${5:username}",
+      "spring.datasource.password=${6:password}",
+      "spring.datasource.driver-class-name=${7:org.postgresql.Driver}",
+      "$0"
+    ]
+  },
+  "spring_jpa": {
+    "prefix": "spring_jpa",
+    "description": "Spring JPA configuration",
+    "body": [
+      "# JPA/Hibernate",
+      "spring.jpa.hibernate.ddl-auto=${1|update,create,create-drop,validate,none|}",
+      "spring.jpa.show-sql=${2|true,false|}",
+      "spring.jpa.properties.hibernate.format_sql=true",
+      "spring.jpa.properties.hibernate.dialect=${3:org.hibernate.dialect.PostgreSQLDialect}",
+      "$0"
+    ]
+  },
+  "spring_server": {
+    "prefix": "spring_server",
+    "description": "Server configuration",
+    "body": [
+      "# Server",
+      "server.port=${1:8080}",
+      "server.servlet.context-path=${2:/api}",
+      "server.error.include-message=always",
+      "server.error.include-binding-errors=always",
+      "$0"
+    ]
+  },
+  "spring_logging": {
+    "prefix": "spring_logging",
+    "description": "Logging configuration",
+    "body": [
+      "# Logging",
+      "logging.level.root=${1|INFO,DEBUG,WARN,ERROR|}",
+      "logging.level.${2:com.example}=${3|DEBUG,INFO|}",
+      "logging.level.org.hibernate.SQL=${4|DEBUG,INFO|}",
+      "logging.pattern.console=%d{yyyy-MM-dd HH:mm:ss} - %msg%n",
+      "$0"
+    ]
+  },
+  "spring_jwt": {
+    "prefix": "spring_jwt",
+    "description": "JWT configuration",
+    "body": [
+      "# JWT",
+      "jwt.secret=${1:your-secret-key-min-256-bits}",
+      "jwt.expiration=${2:86400000}",
+      "jwt.refresh-expiration=${3:604800000}",
+      "$0"
+    ]
+  },
+  "spring_actuator": {
+    "prefix": "spring_actuator",
+    "description": "Actuator configuration",
+    "body": [
+      "# Actuator",
+      "management.endpoints.web.exposure.include=${1|health,info,metrics,*|}",
+      "management.endpoint.health.show-details=${2|always,when_authorized,never|}",
+      "$0"
+    ]
+  }
+}

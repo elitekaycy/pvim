@@ -1,0 +1,21 @@
+{
+  "name": "pvim-snippets",
+  "version": "1.0.0",
+  "description": "Custom Spring Boot snippets for pvim",
+  "contributes": {
+    "snippets": [
+      {
+        "language": "java",
+        "path": "./java.json"
+      },
+      {
+        "language": "yaml",
+        "path": "./yaml.json"
+      },
+      {
+        "language": "properties",
+        "path": "./properties.json"
+      }
+    ]
+  }
+}

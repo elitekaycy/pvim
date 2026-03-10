@@ -16,6 +16,8 @@ return {
 
 		-- Load friendly-snippets
 		require("luasnip.loaders.from_vscode").lazy_load()
+		-- Load custom pvim snippets (Spring Boot, etc.)
+		require("luasnip.loaders.from_vscode").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets" } })
 
 		cmp.setup({
 			snippet = {

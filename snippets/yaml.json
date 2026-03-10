@@ -1,0 +1,188 @@
+{
+  "spring_datasource": {
+    "prefix": "spring_datasource",
+    "description": "Spring datasource configuration",
+    "body": [
+      "spring:",
+      "  datasource:",
+      "    url: jdbc:${1|postgresql,mysql,h2|}://${2:localhost}:${3:5432}/${4:database}",
+      "    username: ${5:username}",
+      "    password: ${6:password}",
+      "    driver-class-name: ${7:org.postgresql.Driver}",
+      "    hikari:",
+      "      maximum-pool-size: 10",
+      "      minimum-idle: 5",
+      "      idle-timeout: 30000",
+      "      connection-timeout: 20000",
+      "$0"
+    ]
+  },
+  "spring_jpa": {
+    "prefix": "spring_jpa",
+    "description": "Spring JPA configuration",
+    "body": [
+      "spring:",
+      "  jpa:",
+      "    hibernate:",
+      "      ddl-auto: ${1|update,create,create-drop,validate,none|}",
+      "    show-sql: ${2|true,false|}",
+      "    properties:",
+      "      hibernate:",
+      "        format_sql: true",
+      "        dialect: ${3:org.hibernate.dialect.PostgreSQLDialect}",
+      "        jdbc:",
+      "          batch_size: 50",
+      "        order_inserts: true",
+      "        order_updates: true",
+      "$0"
+    ]
+  },
+  "spring_security_jwt": {
+    "prefix": "spring_security_jwt",
+    "description": "JWT security configuration",
+    "body": [
+      "jwt:",
+      "  secret: ${1:your-secret-key-min-256-bits}",
+      "  expiration: ${2:86400000}  # 24 hours",
+      "  refresh-expiration: ${3:604800000}  # 7 days",
+      "  issuer: ${4:your-app-name}",
+      "$0"
+    ]
+  },
+  "spring_logging": {
+    "prefix": "spring_logging",
+    "description": "Logging configuration",
+    "body": [
+      "logging:",
+      "  level:",
+      "    root: ${1|INFO,DEBUG,WARN,ERROR|}",
+      "    ${2:com.example}: ${3|DEBUG,INFO,WARN|}",
+      "    org.hibernate.SQL: ${4|DEBUG,INFO|}",
+      "    org.hibernate.type.descriptor.sql: ${5|TRACE,DEBUG|}",
+      "  pattern:",
+      "    console: \"%d{yyyy-MM-dd HH:mm:ss} - %msg%n\"",
+      "  file:",
+      "    name: logs/application.log",
+      "$0"
+    ]
+  },
+  "spring_actuator": {
+    "prefix": "spring_actuator",
+    "description": "Actuator configuration",
+    "body": [
+      "management:",
+      "  endpoints:",
+      "    web:",
+      "      exposure:",
+      "        include: ${1|health,info,metrics,prometheus,\"*\"|}",
+      "      base-path: /actuator",
+      "  endpoint:",
+      "    health:",
+      "      show-details: ${2|always,when_authorized,never|}",
+      "  metrics:",
+      "    export:",
+      "      prometheus:",
+      "        enabled: true",
+      "$0"
+    ]
+  },
+  "spring_cache_redis": {
+    "prefix": "spring_cache_redis",
+    "description": "Redis cache configuration",
+    "body": [
+      "spring:",
+      "  cache:",
+      "    type: redis",
+      "  redis:",
+      "    host: ${1:localhost}",
+      "    port: ${2:6379}",
+      "    password: ${3:}",
+      "    timeout: 60000",
+      "    lettuce:",
+      "      pool:",
+      "        max-active: 8",
+      "        max-idle: 8",
+      "        min-idle: 0",
+      "$0"
+    ]
+  },
+  "spring_kafka": {
+    "prefix": "spring_kafka",
+    "description": "Kafka configuration",
+    "body": [
+      "spring:",
+      "  kafka:",
+      "    bootstrap-servers: ${1:localhost:9092}",
+      "    consumer:",
+      "      group-id: ${2:my-group}",
+      "      auto-offset-reset: ${3|earliest,latest|}",
+      "      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer",
+      "      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer",
+      "    producer:",
+      "      key-serializer: org.apache.kafka.common.serialization.StringSerializer",
+      "      value-serializer: org.apache.kafka.common.serialization.StringSerializer",
+      "$0"
+    ]
+  },
+  "spring_profile": {
+    "prefix": "spring_profile",
+    "description": "Profile-specific configuration",
+    "body": [
+      "---",
+      "spring:",
+      "  config:",
+      "    activate:",
+      "      on-profile: ${1|dev,prod,test,local|}",
+      "",
+      "$0"
+    ]
+  },
+  "spring_flyway": {
+    "prefix": "spring_flyway",
+    "description": "Flyway migration configuration",
+    "body": [
+      "spring:",
+      "  flyway:",
+      "    enabled: true",
+      "    locations: classpath:db/migration",
+      "    baseline-on-migrate: true",
+      "    baseline-version: 0",
+      "    validate-on-migrate: true",
+      "$0"
+    ]
+  },
+  "spring_mail": {
+    "prefix": "spring_mail",
+    "description": "Mail configuration",
+    "body": [
+      "spring:",
+      "  mail:",
+      "    host: ${1:smtp.gmail.com}",
+      "    port: ${2:587}",
+      "    username: ${3:your-email@gmail.com}",
+      "    password: ${4:your-app-password}",
+      "    properties:",
+      "      mail:",
+      "        smtp:",
+      "          auth: true",
+      "          starttls:",
+      "            enable: true",
+      "$0"
+    ]
+  },
+  "spring_openapi": {
+    "prefix": "spring_openapi",
+    "description": "OpenAPI/Swagger configuration",
+    "body": [
+      "springdoc:",
+      "  api-docs:",
+      "    path: /api-docs",
+      "  swagger-ui:",
+      "    path: /swagger-ui.html",
+      "    operationsSorter: method",
+      "    tagsSorter: alpha",
+      "  show-actuator: true",
+      "$0"
+    ]
+  }
+}
