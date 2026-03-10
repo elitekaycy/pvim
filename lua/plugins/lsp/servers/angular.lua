@@ -3,10 +3,25 @@ local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local codelens = require("utils.codelens")
 
 -- Angular Language Server for Angular projects
+-- Only starts if angular.json exists AND node_modules/typescript is present
+local function angular_root_dir(fname)
+    local util = lspconfig.util
+    local angular_root = util.root_pattern("angular.json", "project.json")(fname)
+    if not angular_root then
+        return nil
+    end
+    -- Check if TypeScript is installed in the project
+    local ts_path = angular_root .. "/node_modules/typescript"
+    if vim.fn.isdirectory(ts_path) == 0 then
+        return nil  -- Don't start if TypeScript isn't installed
+    end
+    return angular_root
+end
+
 lspconfig.angularls.setup({
     capabilities = capabilities,
     filetypes = { "typescript", "html", "typescriptreact", "typescript.tsx" },
-    root_dir = lspconfig.util.root_pattern("angular.json", "project.json"),
+    root_dir = angular_root_dir,
     on_attach = function(client, bufnr)
         codelens.on_attach(client, bufnr)
 
