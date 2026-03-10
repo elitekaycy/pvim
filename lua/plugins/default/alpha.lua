@@ -29,6 +29,7 @@ return {
             dashboard.button("r", "  Recent files", ":Telescope oldfiles <CR>"),
             dashboard.button("p", "  Recent projects", ":Telescope projects <CR>"),
             dashboard.button("g", "  Find word", ":Telescope live_grep <CR>"),
+            dashboard.button("t", "  Themes", ":PvimTheme <CR>"),
             dashboard.button("c", "  Config", ":e $MYVIMRC <CR>"),
             dashboard.button("u", "  Update plugins", ":Lazy update <CR>"),
             dashboard.button("q", "  Quit", ":qa<CR>"),
