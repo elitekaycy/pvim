@@ -62,6 +62,55 @@ source ~/.bashrc # For Bash users 4. Use pvim
 
 Now you can use the `pvim` command to open Neovim with your custom configuration.
 
+## Java Development Setup
+
+pvim has first-class Java support with JDTLS (Eclipse JDT Language Server).
+
+### Requirements
+
+- **Java 17+** is required to run JDTLS itself (the language server)
+- Your **projects** can target any Java version (8, 11, 17, 21, etc.)
+
+### Install Java (recommended: SDKMAN)
+
+```bash
+# Install SDKMAN
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+# Install Java 21 (for JDTLS) and Java 11 (for legacy projects)
+sdk install java 21-tem
+sdk install java 11.0.21-tem
+
+# Set default to Java 21
+sdk default java 21-tem
+```
+
+pvim will automatically detect all installed Java versions from:
+- `/usr/lib/jvm`
+- `~/.sdkman/candidates/java`
+- `~/.jdks`
+- `/opt/java`
+
+### Clearing JDTLS Cache
+
+If you experience issues with Java intellisense or after updating pvim, clear the JDTLS workspace cache:
+
+```bash
+rm -rf ~/.local/share/nvim/jdtls/workspace/*
+```
+
+### Java Keybindings
+
+| Keybinding | Description |
+|---|---|
+| `gd` | Go to definition |
+| `K` | Hover documentation |
+| `<leader>ca` | Code actions |
+| `<leader>co` | Organize imports |
+| `<leader>crv` | Extract variable |
+| `<leader>crc` | Extract constant |
+
 ## Keybindings
 
 ### General
