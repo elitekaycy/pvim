@@ -4,18 +4,17 @@
   "description": "Custom Spring Boot snippets for pvim",
   "contributes": {
     "snippets": [
-      {
-        "language": "java",
-        "path": "./java.json"
-      },
-      {
-        "language": "yaml",
-        "path": "./yaml.json"
-      },
-      {
-        "language": "properties",
-        "path": "./properties.json"
-      }
+      { "language": "java", "path": "./java/spring-entity.json" },
+      { "language": "java", "path": "./java/spring-dto.json" },
+      { "language": "java", "path": "./java/spring-controller.json" },
+      { "language": "java", "path": "./java/spring-service.json" },
+      { "language": "java", "path": "./java/spring-repository.json" },
+      { "language": "java", "path": "./java/spring-test.json" },
+      { "language": "java", "path": "./java/spring-config.json" },
+      { "language": "java", "path": "./java/spring-exception.json" },
+      { "language": "java", "path": "./java/spring-common.json" },
+      { "language": "yaml", "path": "./yaml.json" },
+      { "language": "properties", "path": "./properties.json" }
     ]
   }
 }

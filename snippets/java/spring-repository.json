@@ -1,0 +1,103 @@
+{
+  "spring_repository": {
+    "prefix": "spring_repository",
+    "description": "JPA Repository",
+    "body": [
+      "package ${1:com.example.${2:app}}.repository;",
+      "",
+      "import ${1}.entity.${3:Entity};",
+      "import org.springframework.data.jpa.repository.JpaRepository;",
+      "import org.springframework.data.jpa.repository.Query;",
+      "import org.springframework.stereotype.Repository;",
+      "",
+      "import java.util.List;",
+      "import java.util.Optional;",
+      "",
+      "@Repository",
+      "public interface ${TM_FILENAME_BASE} extends JpaRepository<${3}, Long> {",
+      "",
+      "    Optional<${3}> findBy${4:Name}(String ${4/(.*)/${1:/downcase}/});",
+      "",
+      "    List<${3}> findBy${4}ContainingIgnoreCase(String ${4/(.*)/${1:/downcase}/});",
+      "",
+      "    boolean existsBy${4}(String ${4/(.*)/${1:/downcase}/});",
+      "}",
+      "$0"
+    ]
+  },
+  "spring_repository_query": {
+    "prefix": "spring_repository_query",
+    "description": "Repository with custom queries",
+    "body": [
+      "@Query(\"SELECT e FROM ${1:Entity} e WHERE e.${2:field} = :${2}\")",
+      "Optional<${1}> findBy${2/(.*)/${1:/capitalize}/}Custom(@Param(\"${2}\") String ${2});",
+      "",
+      "@Query(value = \"SELECT * FROM ${3:table} WHERE ${2} LIKE %:${2}%\", nativeQuery = true)",
+      "List<${1}> searchBy${2/(.*)/${1:/capitalize}/}(@Param(\"${2}\") String ${2});",
+      "",
+      "@Modifying",
+      "@Query(\"UPDATE ${1} e SET e.${4:status} = :${4} WHERE e.id = :id\")",
+      "int update${4/(.*)/${1:/capitalize}/}(@Param(\"id\") Long id, @Param(\"${4}\") String ${4});",
+      "$0"
+    ]
+  },
+  "spring_mapper": {
+    "prefix": "spring_mapper",
+    "description": "MapStruct Mapper",
+    "body": [
+      "package ${1:com.example.${2:app}}.mapper;",
+      "",
+      "import ${1}.dto.${3:Entity}Dto;",
+      "import ${1}.entity.${3};",
+      "import org.mapstruct.*;",
+      "",
+      "@Mapper(componentModel = \"spring\", unmappedTargetPolicy = ReportingPolicy.IGNORE)",
+      "public interface ${TM_FILENAME_BASE} {",
+      "",
+      "    ${3}Dto toDto(${3} entity);",
+      "",
+      "    ${3} toEntity(${3}Dto dto);",
+      "",
+      "    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)",
+      "    void updateEntity(${3}Dto dto, @MappingTarget ${3} entity);",
+      "}",
+      "$0"
+    ]
+  },
+  "spring_mapper_manual": {
+    "prefix": "spring_mapper_manual",
+    "description": "Manual Mapper (no MapStruct)",
+    "body": [
+      "package ${1:com.example.${2:app}}.mapper;",
+      "",
+      "import ${1}.dto.${3:Entity}Dto;",
+      "import ${1}.entity.${3};",
+      "import org.springframework.stereotype.Component;",
+      "",
+      "@Component",
+      "public class ${TM_FILENAME_BASE} {",
+      "",
+      "    public ${3}Dto toDto(${3} entity) {",
+      "        if (entity == null) return null;",
+      "        ${3}Dto dto = new ${3}Dto();",
+      "        dto.setId(entity.getId());",
+      "        // TODO: map fields",
+      "        return dto;",
+      "    }",
+      "",
+      "    public ${3} toEntity(${3}Dto dto) {",
+      "        if (dto == null) return null;",
+      "        ${3} entity = new ${3}();",
+      "        // TODO: map fields",
+      "        return entity;",
+      "    }",
+      "",
+      "    public void updateEntity(${3}Dto dto, ${3} entity) {",
+      "        if (dto == null || entity == null) return;",
+      "        // TODO: update fields",
+      "    }",
+      "}",
+      "$0"
+    ]
+  }
+}
