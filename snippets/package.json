@@ -13,8 +13,13 @@
       { "language": "java", "path": "./java/spring-config.json" },
       { "language": "java", "path": "./java/spring-exception.json" },
       { "language": "java", "path": "./java/spring-common.json" },
+      { "language": "java", "path": "./java/patterns.json" },
       { "language": "yaml", "path": "./yaml.json" },
-      { "language": "properties", "path": "./properties.json" }
+      { "language": "properties", "path": "./properties.json" },
+      { "language": "xml", "path": "./xml.json" },
+      { "language": "groovy", "path": "./groovy.json" },
+      { "language": "dockerfile", "path": "./dockerfile.json" },
+      { "language": "gitignore", "path": "./gitignore.json" }
     ]
   }
 }
