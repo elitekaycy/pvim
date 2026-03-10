@@ -16,8 +16,10 @@ return {
 
 		-- Load friendly-snippets
 		require("luasnip.loaders.from_vscode").lazy_load()
-		-- Load custom pvim snippets (Spring Boot, etc.)
+		-- Load custom pvim snippets (Spring Boot, etc.) - JSON format
 		require("luasnip.loaders.from_vscode").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets" } })
+		-- Load dynamic Lua snippets (context-aware)
+		require("luasnip.loaders.from_lua").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets/luasnippets" } })
 
 		cmp.setup({
 			snippet = {
