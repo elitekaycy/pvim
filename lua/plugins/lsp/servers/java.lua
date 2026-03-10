@@ -193,8 +193,48 @@ local function setup_jdtls()
         capabilities = capabilities,
         -- Only look for actual Java project markers, NOT .git
         root_dir = jdtls.setup.find_root(java_project_markers),
-        on_attach = function()
-            require("jdtls").setup_dap { hotcodereplace = "auto" }
+        on_attach = function(client, bufnr)
+            -- Setup DAP (Debug Adapter Protocol)
+            require("jdtls").setup_dap({ hotcodereplace = "auto" })
+            require("jdtls.dap").setup_dap_main_class_configs()
+
+            -- LSP Keybindings
+            local opts = { buffer = bufnr, silent = true }
+
+            vim.keymap.set("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
+            vim.keymap.set("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend("force", opts, { desc = "Go to Declaration" }))
+            vim.keymap.set("n", "gi", vim.lsp.buf.implementation, vim.tbl_extend("force", opts, { desc = "Go to Implementation" }))
+            vim.keymap.set("n", "gr", vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "Go to References" }))
+            vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover Documentation" }))
+            vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code Action" }))
+            vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename Symbol" }))
+
+            -- Java-specific refactoring
+            vim.keymap.set("n", "<leader>co", require("jdtls").organize_imports, vim.tbl_extend("force", opts, { desc = "Organize Imports" }))
+            vim.keymap.set("n", "<leader>crv", require("jdtls").extract_variable, vim.tbl_extend("force", opts, { desc = "Extract Variable" }))
+            vim.keymap.set("v", "<leader>crv", function() require("jdtls").extract_variable(true) end, vim.tbl_extend("force", opts, { desc = "Extract Variable" }))
+            vim.keymap.set("n", "<leader>crc", require("jdtls").extract_constant, vim.tbl_extend("force", opts, { desc = "Extract Constant" }))
+            vim.keymap.set("v", "<leader>crc", function() require("jdtls").extract_constant(true) end, vim.tbl_extend("force", opts, { desc = "Extract Constant" }))
+            vim.keymap.set("v", "<leader>crm", function() require("jdtls").extract_method(true) end, vim.tbl_extend("force", opts, { desc = "Extract Method" }))
+
+            -- Java Testing (JUnit)
+            vim.keymap.set("n", "<leader>jt", require("jdtls").test_nearest_method, vim.tbl_extend("force", opts, { desc = "Test Nearest Method" }))
+            vim.keymap.set("n", "<leader>jT", require("jdtls").test_class, vim.tbl_extend("force", opts, { desc = "Test Class" }))
+            vim.keymap.set("n", "<leader>jp", require("jdtls").pick_test, vim.tbl_extend("force", opts, { desc = "Pick Test" }))
+
+            -- Java Debug
+            vim.keymap.set("n", "<leader>jd", function()
+                require("jdtls.dap").setup_dap_main_class_configs()
+                require("dap").continue()
+            end, vim.tbl_extend("force", opts, { desc = "Debug Java" }))
+
+            -- Run main class without debugging
+            vim.keymap.set("n", "<leader>jr", function()
+                local main_class = vim.fn.input("Main class: ")
+                if main_class ~= "" then
+                    vim.cmd("terminal java " .. main_class)
+                end
+            end, vim.tbl_extend("force", opts, { desc = "Run Main Class" }))
         end,
         settings = {
             java = {
@@ -229,45 +269,6 @@ local function setup_jdtls()
     }
 
     jdtls.start_or_attach(config)
-
-    vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = 0 })
-    vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = 0 })
-    vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { buffer = 0 })
-
-    vim.keymap.set(
-        "n",
-        "<leader>co",
-        "<Cmd>lua require'jdtls'.organize_imports()<CR>",
-        { buffer = 0, desc = "Organize Imports" }
-    )
-
-    vim.keymap.set(
-        "n",
-        "<leader>crv",
-        "<Cmd>lua require('jdtls').extract_variable()<CR>",
-        { buffer = 0, desc = "Extract Variable" }
-    )
-    vim.keymap.set(
-        "v",
-        "<leader>crv",
-        "<Esc><Cmd>lua require('jdtls').extract_variable(true)<CR>",
-        { buffer = 0, desc = "Extract Variable" }
-    )
-
-    vim.keymap.set(
-        "n",
-        "<leader>crc",
-        "<Cmd>lua require('jdtls').extract_constant()<CR>",
-        { buffer = 0, desc = "Extract Constant" }
-    )
-    vim.keymap.set(
-        "v",
-        "<leader>crc",
-        "<Esc><Cmd>lua require('jdtls').extract_constant(true)<CR>",
-        { buffer = 0, desc = "Extract Constant" }
-    )
-    --   vim.keymap.set('n', '<leader>jt', jdtls.test_nearest_method, config)
-    --    vim.keymap.set('n', '<leader>jT', jdtls.test_class, config)
 end
 
 vim.api.nvim_create_augroup("JavaLSPGroup", { clear = true })

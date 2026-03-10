@@ -110,6 +110,45 @@ rm -rf ~/.local/share/nvim/jdtls/workspace/*
 | `<leader>co` | Organize imports |
 | `<leader>crv` | Extract variable |
 | `<leader>crc` | Extract constant |
+| `<leader>crm` | Extract method (visual) |
+| `<leader>jt` | Test nearest method (JUnit) |
+| `<leader>jT` | Test class (JUnit) |
+| `<leader>jp` | Pick test to run |
+| `<leader>jd` | Debug Java application |
+| `<leader>jr` | Run Java main class |
+
+## Debugging
+
+pvim includes full debugging support via nvim-dap.
+
+### Debug Keybindings
+
+| Keybinding | Description |
+|---|---|
+| `<F5>` | Start/Continue debugging |
+| `<F10>` | Step over |
+| `<F11>` | Step into |
+| `<F12>` | Step out |
+| `<leader>b` | Toggle breakpoint |
+| `<leader>B` | Conditional breakpoint |
+| `<leader>dc` | Continue |
+| `<leader>di` | Step into |
+| `<leader>do` | Step over |
+| `<leader>dO` | Step out |
+| `<leader>dq` | Terminate debug session |
+| `<leader>dr` | Restart debug session |
+| `<leader>du` | Toggle debug UI |
+| `<leader>de` | Evaluate expression |
+| `<leader>dl` | Run last debug config |
+| `<leader>dC` | Clear all breakpoints |
+
+### Supported Languages
+
+- **Java**: Full debugging and JUnit testing via JDTLS
+- **C/C++**: Debugging via codelldb
+- **Rust**: Debugging via codelldb
+- **Python**: Debugging via nvim-dap-python (if installed)
+- **Go**: Debugging via nvim-dap-go (if installed)
 
 ## Keybindings
 

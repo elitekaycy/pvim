@@ -59,14 +59,36 @@ return {
         end
 
 
-        vim.keymap.set('n', '<F5>', dap.continue)
-        vim.keymap.set('n', '<F10>', dap.step_over)
-        vim.keymap.set('n', '<F11>', dap.step_into)
-        vim.keymap.set('n', '<F12>', dap.step_out)
-        vim.keymap.set('n', '<leader>b', dap.toggle_breakpoint)
-        vim.keymap.set('n', '<leader>B', function()
-            dap.set_breakpoint(vim.fn.input('Breakpoint condition: '))
-        end)
+        -- Debug keybindings
+        vim.keymap.set("n", "<F5>", dap.continue, { desc = "Debug: Continue" })
+        vim.keymap.set("n", "<F10>", dap.step_over, { desc = "Debug: Step Over" })
+        vim.keymap.set("n", "<F11>", dap.step_into, { desc = "Debug: Step Into" })
+        vim.keymap.set("n", "<F12>", dap.step_out, { desc = "Debug: Step Out" })
+        vim.keymap.set("n", "<leader>b", dap.toggle_breakpoint, { desc = "Debug: Toggle Breakpoint" })
+        vim.keymap.set("n", "<leader>B", function()
+            dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
+        end, { desc = "Debug: Conditional Breakpoint" })
+
+        -- Additional debug controls
+        vim.keymap.set("n", "<leader>dc", dap.continue, { desc = "Debug: Continue" })
+        vim.keymap.set("n", "<leader>di", dap.step_into, { desc = "Debug: Step Into" })
+        vim.keymap.set("n", "<leader>do", dap.step_over, { desc = "Debug: Step Over" })
+        vim.keymap.set("n", "<leader>dO", dap.step_out, { desc = "Debug: Step Out" })
+        vim.keymap.set("n", "<leader>dq", dap.terminate, { desc = "Debug: Terminate" })
+        vim.keymap.set("n", "<leader>dr", dap.restart, { desc = "Debug: Restart" })
+        vim.keymap.set("n", "<leader>dp", dap.pause, { desc = "Debug: Pause" })
+
+        -- DAP UI controls
+        vim.keymap.set("n", "<leader>du", dapui.toggle, { desc = "Debug: Toggle UI" })
+        vim.keymap.set("n", "<leader>de", dapui.eval, { desc = "Debug: Evaluate" })
+        vim.keymap.set("v", "<leader>de", dapui.eval, { desc = "Debug: Evaluate Selection" })
+
+        -- Breakpoint management
+        vim.keymap.set("n", "<leader>dB", function()
+            dap.set_breakpoint(nil, nil, vim.fn.input("Log point message: "))
+        end, { desc = "Debug: Log Point" })
+        vim.keymap.set("n", "<leader>dl", dap.run_last, { desc = "Debug: Run Last" })
+        vim.keymap.set("n", "<leader>dC", dap.clear_breakpoints, { desc = "Debug: Clear Breakpoints" })
 
 
         require("nvim-dap-virtual-text").setup {
