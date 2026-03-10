@@ -1,17 +1,12 @@
 return {
     "ahmedkhalf/project.nvim",
+    lazy = true,
+    event = "VeryLazy",
     config = function()
         require("project_nvim").setup({
-            -- Detection methods: "lsp", "pattern", or both
             detection_methods = { "pattern", "lsp" },
-
-            -- Patterns to detect project root
             patterns = {
                 ".git",
-                "_darcs",
-                ".hg",
-                ".bzr",
-                ".svn",
                 "Makefile",
                 "package.json",
                 "pom.xml",
@@ -19,28 +14,19 @@ return {
                 "build.gradle.kts",
                 "Cargo.toml",
                 "go.mod",
-                "pyproject.toml",
-                "setup.py",
-                "requirements.txt",
             },
-
-            -- Don't change directory when opening a file
             silent_chdir = true,
-
-            -- Show hidden files in telescope
-            show_hidden = true,
-
-            -- Scope for changing directory
+            show_hidden = false,
             scope_chdir = "global",
-
-            -- Path to store project history
             datapath = vim.fn.stdpath("data"),
+            exclude_dirs = { "~/.cargo/*", "*/node_modules/*" },
         })
 
-        -- Load telescope extension
-        require("telescope").load_extension("projects")
+        -- Lazy load telescope extension
+        vim.defer_fn(function()
+            pcall(function() require("telescope").load_extension("projects") end)
+        end, 100)
 
-        -- Keybinding for quick project access
         vim.keymap.set("n", "<leader>fp", ":Telescope projects<CR>", { desc = "Find Projects", silent = true })
     end,
 }
