@@ -1,17 +1,28 @@
 -- C/C++ DAP configuration using codelldb
 local dap = require("dap")
-local mason_registry = require("mason-registry")
 
--- Setup codelldb adapter from mason
+-- Setup codelldb adapter from mason (deferred to avoid startup errors)
 local function setup_codelldb()
-    if not mason_registry.is_installed("codelldb") then
-        vim.notify("codelldb not installed. Run :MasonInstall codelldb", vim.log.levels.WARN)
-        return
+    local ok, mason_registry = pcall(require, "mason-registry")
+    if not ok then return false end
+
+    -- Check if codelldb is installed
+    local installed = pcall(function()
+        return mason_registry.is_installed("codelldb")
+    end)
+
+    if not installed or not mason_registry.is_installed("codelldb") then
+        return false
     end
 
-    local codelldb_path = mason_registry.get_package("codelldb"):get_install_path()
+    local pkg_ok, codelldb_pkg = pcall(function()
+        return mason_registry.get_package("codelldb")
+    end)
+
+    if not pkg_ok then return false end
+
+    local codelldb_path = codelldb_pkg:get_install_path()
     local codelldb_bin = codelldb_path .. "/extension/adapter/codelldb"
-    local liblldb_path = codelldb_path .. "/extension/lldb/lib/liblldb.so"
 
     dap.adapters.codelldb = {
         type = "server",
@@ -22,12 +33,25 @@ local function setup_codelldb()
         },
     }
 
-    -- Also register as 'lldb' for compatibility
     dap.adapters.lldb = dap.adapters.codelldb
+    return true
 end
 
--- Setup adapter
-setup_codelldb()
+-- Try to setup adapter (silently fail if not installed)
+vim.defer_fn(function()
+    if not setup_codelldb() then
+        -- Setup will be retried when user opens C/C++ file
+        vim.api.nvim_create_autocmd("FileType", {
+            pattern = { "c", "cpp", "rust" },
+            once = true,
+            callback = function()
+                if not setup_codelldb() then
+                    vim.notify("codelldb not installed. Run :MasonInstall codelldb", vim.log.levels.INFO)
+                end
+            end,
+        })
+    end
+end, 1000)
 
 -- C/C++ debug configurations
 dap.configurations.cpp = {

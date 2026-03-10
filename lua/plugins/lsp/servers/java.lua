@@ -206,16 +206,64 @@ local function setup_jdtls()
             vim.keymap.set("n", "gi", vim.lsp.buf.implementation, vim.tbl_extend("force", opts, { desc = "Go to Implementation" }))
             vim.keymap.set("n", "gr", vim.lsp.buf.references, vim.tbl_extend("force", opts, { desc = "Go to References" }))
             vim.keymap.set("n", "K", vim.lsp.buf.hover, vim.tbl_extend("force", opts, { desc = "Hover Documentation" }))
-            vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code Action" }))
             vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, vim.tbl_extend("force", opts, { desc = "Rename Symbol" }))
 
-            -- Java-specific refactoring
+            -- Code Actions (normal and visual mode)
+            vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code Action" }))
+            vim.keymap.set("v", "<leader>ca", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "Code Action (Visual)" }))
+
+            -- Java-specific refactoring (under <leader>cr prefix)
             vim.keymap.set("n", "<leader>co", require("jdtls").organize_imports, vim.tbl_extend("force", opts, { desc = "Organize Imports" }))
             vim.keymap.set("n", "<leader>crv", require("jdtls").extract_variable, vim.tbl_extend("force", opts, { desc = "Extract Variable" }))
             vim.keymap.set("v", "<leader>crv", function() require("jdtls").extract_variable(true) end, vim.tbl_extend("force", opts, { desc = "Extract Variable" }))
             vim.keymap.set("n", "<leader>crc", require("jdtls").extract_constant, vim.tbl_extend("force", opts, { desc = "Extract Constant" }))
             vim.keymap.set("v", "<leader>crc", function() require("jdtls").extract_constant(true) end, vim.tbl_extend("force", opts, { desc = "Extract Constant" }))
             vim.keymap.set("v", "<leader>crm", function() require("jdtls").extract_method(true) end, vim.tbl_extend("force", opts, { desc = "Extract Method" }))
+
+            -- Additional Java code actions
+            vim.keymap.set("n", "<leader>cri", function()
+                require("jdtls").extract_variable()
+                vim.schedule(function() require("jdtls").organize_imports() end)
+            end, vim.tbl_extend("force", opts, { desc = "Extract & Import" }))
+
+            -- Super type hierarchy
+            vim.keymap.set("n", "<leader>cs", require("jdtls").super_implementation, vim.tbl_extend("force", opts, { desc = "Go to Super Implementation" }))
+
+            -- Java source actions menu
+            vim.keymap.set("n", "<leader>cg", function()
+                local actions = {
+                    { name = "Generate Constructors", action = function() require("jdtls").generate_constructors() end },
+                    { name = "Generate toString()", action = function() require("jdtls").generate_toString() end },
+                    { name = "Generate hashCode/equals", action = function() require("jdtls").generate_hashCode_and_equals() end },
+                    { name = "Generate Getters", action = function() require("jdtls").generate_accessors({ kind = "getter" }) end },
+                    { name = "Generate Setters", action = function() require("jdtls").generate_accessors({ kind = "setter" }) end },
+                    { name = "Generate Getters & Setters", action = function() require("jdtls").generate_accessors() end },
+                    { name = "Generate Delegate Methods", action = function() require("jdtls").generate_delegate_methods() end },
+                    { name = "Override Methods", action = function() require("jdtls").override_methods() end },
+                }
+                vim.ui.select(actions, {
+                    prompt = "Java Generate:",
+                    format_item = function(item) return item.name end,
+                }, function(choice)
+                    if choice then choice.action() end
+                end)
+            end, vim.tbl_extend("force", opts, { desc = "Generate Code Menu" }))
+
+            -- Quick generate shortcuts
+            vim.keymap.set("n", "<leader>cgc", function() require("jdtls").generate_constructors() end, vim.tbl_extend("force", opts, { desc = "Generate Constructor" }))
+            vim.keymap.set("n", "<leader>cgt", function() require("jdtls").generate_toString() end, vim.tbl_extend("force", opts, { desc = "Generate toString()" }))
+            vim.keymap.set("n", "<leader>cge", function() require("jdtls").generate_hashCode_and_equals() end, vim.tbl_extend("force", opts, { desc = "Generate equals/hashCode" }))
+            vim.keymap.set("n", "<leader>cgg", function() require("jdtls").generate_accessors({ kind = "getter" }) end, vim.tbl_extend("force", opts, { desc = "Generate Getters" }))
+            vim.keymap.set("n", "<leader>cgs", function() require("jdtls").generate_accessors({ kind = "setter" }) end, vim.tbl_extend("force", opts, { desc = "Generate Setters" }))
+            vim.keymap.set("n", "<leader>cga", function() require("jdtls").generate_accessors() end, vim.tbl_extend("force", opts, { desc = "Generate All Accessors" }))
+            vim.keymap.set("n", "<leader>cgd", function() require("jdtls").generate_delegate_methods() end, vim.tbl_extend("force", opts, { desc = "Generate Delegate Methods" }))
+            vim.keymap.set("n", "<leader>cgo", function() require("jdtls").override_methods() end, vim.tbl_extend("force", opts, { desc = "Override Methods" }))
+
+            -- Java build and compile
+            vim.keymap.set("n", "<leader>jb", function() require("jdtls").build_projects() end, vim.tbl_extend("force", opts, { desc = "Build Projects" }))
+            vim.keymap.set("n", "<leader>ju", function() require("jdtls").update_project_config() end, vim.tbl_extend("force", opts, { desc = "Update Project Config" }))
+            vim.keymap.set("n", "<leader>jc", function() require("jdtls").compile("full") end, vim.tbl_extend("force", opts, { desc = "Compile (Full)" }))
+            vim.keymap.set("n", "<leader>ji", function() require("jdtls").compile("incremental") end, vim.tbl_extend("force", opts, { desc = "Compile (Incremental)" }))
 
             -- Java Testing (JUnit)
             vim.keymap.set("n", "<leader>jt", require("jdtls").test_nearest_method, vim.tbl_extend("force", opts, { desc = "Test Nearest Method" }))
@@ -228,13 +276,38 @@ local function setup_jdtls()
                 require("dap").continue()
             end, vim.tbl_extend("force", opts, { desc = "Debug Java" }))
 
-            -- Run main class without debugging
+            -- Run main class
             vim.keymap.set("n", "<leader>jr", function()
-                local main_class = vim.fn.input("Main class: ")
-                if main_class ~= "" then
-                    vim.cmd("terminal java " .. main_class)
-                end
+                require("jdtls.dap").setup_dap_main_class_configs()
+                -- Try to run without debugging
+                local dap = require("dap")
+                dap.run({
+                    type = "java",
+                    request = "launch",
+                    name = "Run Main",
+                    mainClass = function()
+                        return vim.fn.input("Main class: ")
+                    end,
+                    console = "integratedTerminal",
+                    noDebug = true,
+                })
             end, vim.tbl_extend("force", opts, { desc = "Run Main Class" }))
+
+            -- Java workspace management
+            vim.keymap.set("n", "<leader>jw", function()
+                local actions = {
+                    { name = "Clean Workspace", action = function() vim.cmd("JdtWipeDataAndRestart") end },
+                    { name = "Update Project Config", action = function() require("jdtls").update_project_config() end },
+                    { name = "Build Projects", action = function() require("jdtls").build_projects() end },
+                    { name = "Refresh File", action = function() vim.cmd("edit!") end },
+                }
+                vim.ui.select(actions, {
+                    prompt = "Java Workspace:",
+                    format_item = function(item) return item.name end,
+                }, function(choice)
+                    if choice then choice.action() end
+                end)
+            end, vim.tbl_extend("force", opts, { desc = "Workspace Menu" }))
         end,
         settings = {
             java = {
