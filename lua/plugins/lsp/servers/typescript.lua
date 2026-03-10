@@ -6,7 +6,7 @@ lspconfig.ts_ls.setup({
     capabilities = capabilities,
     filetypes = { "typescript", "typescriptreact", "typescript.tsx", "javascript", "javascriptreact", "javascript.jsx" },
     cmd = { "typescript-language-server", "--stdio" },
-    root_dir = lspconfig.util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git"),
+    root_dir = lspconfig.util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", "angular.json", ".git"),
     settings = {
         typescript = {
             inlayHints = {

@@ -11,10 +11,11 @@ vim.keymap.set(
     { noremap = true, silent = true, desc = "Toggle File Explorer" }
 )
 
-vim.cmd([[autocmd BufWinLeave NvimTree_* silent! NvimTreeClose]])
-vim.keymap.set(
-    "n",
-    "<CR>",
-    ":lua require'nvim-tree.api'.node.open.new_tab()<CR>",
-    { noremap = true, silent = true, desc = "Open File in New Buffer" }
-)
+local nvimtree_group = vim.api.nvim_create_augroup("PvimNvimTree", { clear = true })
+vim.api.nvim_create_autocmd("BufWinLeave", {
+    group = nvimtree_group,
+    pattern = "NvimTree_*",
+    command = "silent! NvimTreeClose",
+})
+
+-- Note: <CR> keymap for nvim-tree should be set in nvim-tree's on_attach, not globally

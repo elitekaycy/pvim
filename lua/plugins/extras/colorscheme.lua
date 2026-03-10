@@ -138,23 +138,31 @@ local themes = {
     end },
 }
 
--- Load saved theme
+-- Load saved theme (with proper error handling)
 local function get_saved_theme()
-    local file = io.open(theme_file, "r")
-    if file then
+    local ok, result = pcall(function()
+        local file = io.open(theme_file, "r")
+        if not file then return nil end
         local theme = file:read("*l")
         file:close()
         return theme
+    end)
+    if ok and result then
+        return result
     end
     return "kanagawa" -- default
 end
 
--- Save theme preference
+-- Save theme preference (with proper error handling)
 local function save_theme(name)
-    local file = io.open(theme_file, "w")
-    if file then
+    local ok, err = pcall(function()
+        local file = io.open(theme_file, "w")
+        if not file then return end
         file:write(name)
         file:close()
+    end)
+    if not ok then
+        vim.notify("Failed to save theme: " .. tostring(err), vim.log.levels.WARN)
     end
 end
 

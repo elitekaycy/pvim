@@ -1,15 +1,46 @@
-local capabilities     = require("cmp_nvim_lsp").default_capabilities()
-local jdtls            = require("jdtls")
-local mason_registry   = require("mason-registry")
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-local jdtls_path       = mason_registry.get_package("jdtls"):get_install_path()
-local lombok_jar       = jdtls_path .. "/lombok.jar"
-local launcher_jar     = vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
-local config_dir       = jdtls_path .. "/config_linux"
+-- Get jdtls paths - check mason install path directly for reliability
+local function get_jdtls_paths()
+    -- Try mason path first (most reliable)
+    local mason_path = vim.fn.stdpath("data") .. "/mason/packages/jdtls"
+    if vim.fn.isdirectory(mason_path) == 1 then
+        local launcher_jar = vim.fn.glob(mason_path .. "/plugins/org.eclipse.equinox.launcher_*.jar")
+        if launcher_jar ~= "" then
+            return {
+                path = mason_path,
+                lombok_jar = mason_path .. "/lombok.jar",
+                launcher_jar = launcher_jar,
+                config_dir = mason_path .. "/config_linux",
+            }
+        end
+    end
+
+    -- Fallback: try mason-registry API
+    local ok, mason_registry = pcall(require, "mason-registry")
+    if ok then
+        local pkg_ok, jdtls_pkg = pcall(mason_registry.get_package, "jdtls")
+        if pkg_ok and jdtls_pkg and jdtls_pkg.is_installed and jdtls_pkg:is_installed() then
+            local path_ok, jdtls_path = pcall(function() return jdtls_pkg:get_install_path() end)
+            if path_ok and jdtls_path then
+                return {
+                    path = jdtls_path,
+                    lombok_jar = jdtls_path .. "/lombok.jar",
+                    launcher_jar = vim.fn.glob(jdtls_path .. "/plugins/org.eclipse.equinox.launcher_*.jar"),
+                    config_dir = jdtls_path .. "/config_linux",
+                }
+            end
+        end
+    end
+
+    return nil
+end
 
 -- Use full path hash to avoid workspace collisions between projects with same folder name
-local project_name     = vim.fn.fnamemodify(vim.fn.getcwd(), ":p"):gsub("/", "_"):gsub(":", "_")
-local workspace_dir    = vim.fn.stdpath("data") .. "/jdtls/workspace/" .. project_name
+local function get_workspace_dir()
+    local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p"):gsub("/", "_"):gsub(":", "_")
+    return vim.fn.stdpath("data") .. "/jdtls/workspace/" .. project_name
+end
 
 -- Java project markers for root detection (includes .git for monorepos, but is_java_project() guards startup)
 local java_project_markers = { "pom.xml", "build.gradle", "build.gradle.kts", "mvnw", "gradlew", ".mvn", "settings.gradle", "settings.gradle.kts", ".git" }
@@ -27,6 +58,8 @@ end
 local java_base_paths = {
     "/usr/lib/jvm",
     vim.fn.expand("~/.sdkman/candidates/java"),
+    vim.fn.expand("~/.asdf/installs/java"),  -- asdf version manager
+    vim.fn.expand("~/.local/share/mise/installs/java"),  -- mise version manager
     vim.fn.expand("~/.jdks"),
     "/opt/java",
 }
@@ -134,17 +167,14 @@ local function detect_java_runtimes()
     return runtimes
 end
 
--- Get JDTLS Java binary (must be 17+)
-local jdtls_java = find_jdtls_java()
-
--- Get debug bundles from mason (for DAP support)
+-- Get debug bundles from mason (for DAP support) - uses direct path for reliability
 local function get_debug_bundles()
     local bundles = {}
-    local mason_registry = require("mason-registry")
+    local mason_packages = vim.fn.stdpath("data") .. "/mason/packages"
 
     -- Java debug adapter
-    if mason_registry.is_installed("java-debug-adapter") then
-        local java_debug_path = mason_registry.get_package("java-debug-adapter"):get_install_path()
+    local java_debug_path = mason_packages .. "/java-debug-adapter"
+    if vim.fn.isdirectory(java_debug_path) == 1 then
         local debug_jar = vim.fn.glob(java_debug_path .. "/extension/server/com.microsoft.java.debug.plugin-*.jar", false, true)
         if #debug_jar > 0 then
             vim.list_extend(bundles, debug_jar)
@@ -152,8 +182,8 @@ local function get_debug_bundles()
     end
 
     -- Java test adapter
-    if mason_registry.is_installed("java-test") then
-        local java_test_path = mason_registry.get_package("java-test"):get_install_path()
+    local java_test_path = mason_packages .. "/java-test"
+    if vim.fn.isdirectory(java_test_path) == 1 then
         local test_jars = vim.fn.glob(java_test_path .. "/extension/server/*.jar", false, true)
         vim.list_extend(bundles, test_jars)
     end
@@ -167,6 +197,16 @@ local function setup_jdtls()
         return
     end
 
+    -- Get JDTLS paths (deferred to ensure mason has installed packages)
+    local paths = get_jdtls_paths()
+    if not paths then
+        vim.notify("JDTLS not installed. Run :MasonInstall jdtls", vim.log.levels.WARN)
+        return
+    end
+
+    local jdtls = require("jdtls")
+    local jdtls_java = find_jdtls_java()
+    local workspace_dir = get_workspace_dir()
     local detected_runtimes = detect_java_runtimes()
     local debug_bundles = get_debug_bundles()
 
@@ -178,15 +218,15 @@ local function setup_jdtls()
             "-Declipse.product=org.eclipse.jdt.ls.core.product",
             "-Dlog.protocol=true",
             "-Dlog.level=ALL",
-            "-javaagent:" .. lombok_jar,
+            "-javaagent:" .. paths.lombok_jar,
             "-Xms1g",
             "--add-modules=ALL-SYSTEM",
             "--add-opens=java.base/java.util=ALL-UNNAMED",
             "--add-opens=java.base/java.lang=ALL-UNNAMED",
             "-jar",
-            launcher_jar,
+            paths.launcher_jar,
             "-configuration",
-            config_dir,
+            paths.config_dir,
             "-data",
             workspace_dir,
         },

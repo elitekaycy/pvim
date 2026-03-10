@@ -26,35 +26,43 @@ return {
                 "ts_ls",
                 "tailwindcss",
                 "cssls",
-                -- Java
-                "jdtls",
+                -- Angular
+                "angularls",
                 -- Lua
                 "lua_ls",
                 -- C/C++
                 "clangd",
+                -- Java (installed by mason, but configured by nvim-jdtls directly)
+                "jdtls",
             },
             automatic_installation = true,
+            -- Exclude jdtls from automatic enable - we use nvim-jdtls plugin directly
+            automatic_enable = {
+                exclude = { "jdtls" },
+            },
         })
 
-        require("mason-nvim-lint").setup({
-            ensure_installed = {
-                "eslint_d",
-                "golangci-lint",
-                "checkstyle",
-                "shellcheck",
-            },
-            automatic_installation = true,
-        })
+        -- mason-nvim-lint can fail if linters aren't available
+        pcall(function()
+            require("mason-nvim-lint").setup({
+                ensure_installed = {
+                    "eslint_d",
+                    "shellcheck",
+                },
+                automatic_installation = true,
+            })
+        end)
 
-        require("mason-nvim-dap").setup({
-            ensure_installed = {
-                -- Java debugging
-                "java-debug-adapter",
-                "java-test",
-                -- C/C++ debugging
-                "codelldb",
-            },
-            automatic_installation = true,
-        })
+        -- mason-nvim-dap can fail if adapters aren't available
+        pcall(function()
+            require("mason-nvim-dap").setup({
+                ensure_installed = {
+                    "java-debug-adapter",
+                    "java-test",
+                    "codelldb",
+                },
+                automatic_installation = true,
+            })
+        end)
     end,
 }

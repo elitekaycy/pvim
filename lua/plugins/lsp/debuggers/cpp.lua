@@ -15,13 +15,13 @@ local function setup_codelldb()
         return false
     end
 
-    local pkg_ok, codelldb_pkg = pcall(function()
-        return mason_registry.get_package("codelldb")
+    local codelldb_pkg = mason_registry.get_package("codelldb")
+    if not codelldb_pkg then return false end
+
+    local path_ok, codelldb_path = pcall(function()
+        return codelldb_pkg:get_install_path()
     end)
-
-    if not pkg_ok then return false end
-
-    local codelldb_path = codelldb_pkg:get_install_path()
+    if not path_ok then return false end
     local codelldb_bin = codelldb_path .. "/extension/adapter/codelldb"
 
     dap.adapters.codelldb = {

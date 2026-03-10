@@ -1,7 +1,10 @@
 local M = {}
 
+local codelens_group = vim.api.nvim_create_augroup("PvimCodeLens", { clear = true })
+
 function M.setup_codelens()
     vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+        group = codelens_group,
         callback = function()
             vim.lsp.codelens.refresh()
             local ok, lightbulb = pcall(require, 'nvim-lightbulb')
@@ -23,7 +26,7 @@ function M.setup_codelens()
         end
     })
 
-    vim.keymap.set('n', '<leader>cl', vim.lsp.codelens.run, 
+    vim.keymap.set('n', '<leader>cl', vim.lsp.codelens.run,
         { noremap = true, silent = true, desc = 'Run CodeLens action' })
 end
 
