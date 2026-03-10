@@ -57,7 +57,85 @@ local themes = {
     { name = "nightfox", colorscheme = "nightfox", setup = function()
         require("nightfox").setup({ options = { transparent = true } })
     end },
+    { name = "carbonfox", colorscheme = "carbonfox", setup = function()
+        require("nightfox").setup({ options = { transparent = true } })
+    end },
+    { name = "terafox", colorscheme = "terafox", setup = function()
+        require("nightfox").setup({ options = { transparent = true } })
+    end },
     { name = "dracula", colorscheme = "dracula", setup = function() end },
+    -- Minimal dark themes
+    { name = "github-dark", colorscheme = "github_dark", setup = function()
+        require("github-theme").setup({ options = { transparent = true } })
+    end },
+    { name = "github-dimmed", colorscheme = "github_dark_dimmed", setup = function()
+        require("github-theme").setup({ options = { transparent = true } })
+    end },
+    { name = "oxocarbon", colorscheme = "oxocarbon", setup = function() end },
+    { name = "nord", colorscheme = "nord", setup = function()
+        vim.g.nord_disable_background = true
+    end },
+    { name = "everforest", colorscheme = "everforest", setup = function()
+        vim.g.everforest_transparent_background = 1
+        vim.g.everforest_background = "hard"
+    end },
+    { name = "melange", colorscheme = "melange", setup = function() end },
+    { name = "material-deep-ocean", colorscheme = "material", setup = function()
+        vim.g.material_style = "deep ocean"
+        require("material").setup({ disable = { background = true } })
+    end },
+    { name = "material-oceanic", colorscheme = "material", setup = function()
+        vim.g.material_style = "oceanic"
+        require("material").setup({ disable = { background = true } })
+    end },
+    { name = "material-darker", colorscheme = "material", setup = function()
+        vim.g.material_style = "darker"
+        require("material").setup({ disable = { background = true } })
+    end },
+    { name = "moonfly", colorscheme = "moonfly", setup = function()
+        vim.g.moonflyTransparent = true
+    end },
+    { name = "nightfly", colorscheme = "nightfly", setup = function()
+        vim.g.nightflyTransparent = true
+    end },
+    { name = "embark", colorscheme = "embark", setup = function() end },
+    { name = "ayu-dark", colorscheme = "ayu-dark", setup = function()
+        require("ayu").setup({ mirage = false, overrides = { Normal = { bg = "None" } } })
+    end },
+    { name = "ayu-mirage", colorscheme = "ayu-mirage", setup = function()
+        require("ayu").setup({ mirage = true, overrides = { Normal = { bg = "None" } } })
+    end },
+    { name = "vscode-dark", colorscheme = "vscode", setup = function()
+        require("vscode").setup({ transparent = true, style = "dark" })
+    end },
+    { name = "zenburn", colorscheme = "zenburn", setup = function() end },
+    { name = "monokai-pro", colorscheme = "monokai-pro", setup = function()
+        require("monokai-pro").setup({ transparent_background = true })
+    end },
+    { name = "monokai-classic", colorscheme = "monokai-pro-classic", setup = function()
+        require("monokai-pro").setup({ transparent_background = true, filter = "classic" })
+    end },
+    { name = "sonokai", colorscheme = "sonokai", setup = function()
+        vim.g.sonokai_transparent_background = 1
+        vim.g.sonokai_style = "default"
+    end },
+    { name = "sonokai-shusia", colorscheme = "sonokai", setup = function()
+        vim.g.sonokai_transparent_background = 1
+        vim.g.sonokai_style = "shusia"
+    end },
+    { name = "sonokai-andromeda", colorscheme = "sonokai", setup = function()
+        vim.g.sonokai_transparent_background = 1
+        vim.g.sonokai_style = "andromeda"
+    end },
+    { name = "poimandres", colorscheme = "poimandres", setup = function()
+        require("poimandres").setup({ disable_background = true })
+    end },
+    { name = "cyberdream", colorscheme = "cyberdream", setup = function()
+        require("cyberdream").setup({ transparent = true })
+    end },
+    { name = "fluoromachine", colorscheme = "fluoromachine", setup = function()
+        require("fluoromachine").setup({ transparent = true, glow = true })
+    end },
 }
 
 -- Load saved theme
@@ -142,7 +220,7 @@ return {
         lazy = false,
         priority = 1000,
     },
-    -- Additional themes
+    -- Popular themes
     { "folke/tokyonight.nvim", lazy = true },
     { "catppuccin/nvim", name = "catppuccin", lazy = true },
     { "ellisonleao/gruvbox.nvim", lazy = true },
@@ -150,6 +228,24 @@ return {
     { "rose-pine/neovim", name = "rose-pine", lazy = true },
     { "EdenEast/nightfox.nvim", lazy = true },
     { "Mofiqul/dracula.nvim", lazy = true },
+    -- Dark minimal themes
+    { "projekt0n/github-nvim-theme", lazy = true },
+    { "nyoom-engineering/oxocarbon.nvim", lazy = true },
+    { "shaunsingh/nord.nvim", lazy = true },
+    { "sainnhe/everforest", lazy = true },
+    { "savq/melange-nvim", lazy = true },
+    { "marko-cerovac/material.nvim", lazy = true },
+    { "bluz71/vim-moonfly-colors", name = "moonfly", lazy = true },
+    { "bluz71/vim-nightfly-colors", name = "nightfly", lazy = true },
+    { "embark-theme/vim", name = "embark", lazy = true },
+    { "Shatur/neovim-ayu", lazy = true },
+    { "Mofiqul/vscode.nvim", lazy = true },
+    { "phha/zenburn.nvim", lazy = true },
+    { "loctvl842/monokai-pro.nvim", lazy = true },
+    { "sainnhe/sonokai", lazy = true },
+    { "olivercederborg/poimandres.nvim", lazy = true },
+    { "scottmckendry/cyberdream.nvim", lazy = true },
+    { "maxmx03/fluoromachine.nvim", lazy = true },
     -- Load saved theme on startup
     {
         "nvim-lua/plenary.nvim",
