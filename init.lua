@@ -9,11 +9,17 @@ end
 
 -- Suppress position_encoding deprecation warning (plugins not yet updated for nvim 0.11)
 local original_notify = vim.notify
+local original_notify_once = vim.notify_once
+local function should_suppress(msg)
+    return type(msg) == "string" and msg:match("position_encoding param is required")
+end
 vim.notify = function(msg, level, opts)
-    if type(msg) == "string" and msg:match("position_encoding param is required") then
-        return  -- Suppress this deprecation notice
-    end
+    if should_suppress(msg) then return end
     return original_notify(msg, level, opts)
+end
+vim.notify_once = function(msg, level, opts)
+    if should_suppress(msg) then return end
+    return original_notify_once(msg, level, opts)
 end
 
 require("core.settings")
