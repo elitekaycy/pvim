@@ -1,73 +1,68 @@
-local dap = require('dap')
--- local mason_registry = require("mason-registry")
+-- Java DAP configuration
+-- Note: The actual debug adapter is set up by jdtls.setup_dap() in java.lua
+-- This file provides additional DAP configurations for Java debugging
 
--- local java_debug_adapter_path =
---     mason_registry.get_package('java-debug-adapter')
---     :get_install_path()
+local dap = require("dap")
 
--- local java_test_path = mason_registry.get_package("java-test"):get_install_path()
--- local jdtls_path     = mason_registry.get_package("jdtls"):get_install_path()
-
-
-dap.adapters.java = function(callback)
-    callback({
-        type = 'server',
-        host = '127.0.0.1',
-        port = 0,
-        executable = {
-            command = 'java',
-            args = {
-                '-Xmx1g',
-                '-jar',
-                -- java_debug_adapter_path .. '/extension/server/com.microsoft.java.debug.plugin-0.38.0.jar',
-                '--parsing-debounce-delay=200'
-            }
-        }
-    })
-end
-
-
+-- DAP configurations for Java (used with nvim-jdtls)
+-- The adapter is automatically configured by jdtls.setup_dap()
 dap.configurations.java = {
-    -- Run Current File
+    -- Debug Current File
     {
-        type = 'java',
-        request = 'launch',
-        name = 'Debug Current File',
+        type = "java",
+        request = "launch",
+        name = "Debug Current File",
         mainClass = function()
-            return vim.fn.input('Main class: ')
+            return vim.fn.input("Main class: ")
         end,
         args = function()
-            local args_string = vim.fn.input('Program arguments: ')
-            return vim.split(args_string, ' ')
+            local args_string = vim.fn.input("Program arguments: ")
+            return vim.split(args_string, " ")
         end,
-        cwd = '${workspaceFolder}',
-        console = 'internalConsole',
+        cwd = "${workspaceFolder}",
+        console = "internalConsole",
         stopOnEntry = false,
     },
 
-    -- Run JUnit Test
+    -- Debug JUnit Test
     {
-        type = 'java',
-        request = 'launch',
-        name = 'Debug JUnit Test',
-        mainClass = 'org.junit.runners.JUnit4',
+        type = "java",
+        request = "launch",
+        name = "Debug JUnit Test",
+        mainClass = "org.junit.platform.console.ConsoleLauncher",
         args = function()
-            local test_class = vim.fn.input('Test class name: ')
-            return { test_class }
+            local test_class = vim.fn.input("Test class name: ")
+            return { "--select-class=" .. test_class }
         end,
-        cwd = '${workspaceFolder}',
-        console = 'internalConsole',
-        testClass = function()
-            return vim.fn.input('Test class name: ')
-        end
+        cwd = "${workspaceFolder}",
+        console = "internalConsole",
     },
 
-    -- Remote Debug Configuration
+    -- Remote Debug (attach to running JVM)
     {
-        type = 'java',
-        request = 'attach',
-        name = 'Remote Debug',
-        hostName = 'localhost',
+        type = "java",
+        request = "attach",
+        name = "Remote Debug (port 5005)",
+        hostName = "localhost",
         port = 5005,
-    }
+    },
+
+    -- Debug with custom JVM args
+    {
+        type = "java",
+        request = "launch",
+        name = "Debug with Custom Args",
+        mainClass = function()
+            return vim.fn.input("Main class: ")
+        end,
+        vmArgs = function()
+            return vim.fn.input("VM arguments (e.g., -Xmx2g): ")
+        end,
+        args = function()
+            local args_string = vim.fn.input("Program arguments: ")
+            return vim.split(args_string, " ")
+        end,
+        cwd = "${workspaceFolder}",
+        console = "internalConsole",
+    },
 }

@@ -10,37 +10,49 @@ return {
     },
     config = function()
         require("mason").setup({
-            ensure_installed = {
-                "clangd-format",
-                "codelldb"
-            }
+            ui = {
+                icons = {
+                    package_installed = "✓",
+                    package_pending = "➜",
+                    package_uninstalled = "✗",
+                },
+            },
         })
 
         require("mason-lspconfig").setup({
             ensure_installed = {
+                -- Web
                 "html",
-                "jdtls",
-                "lua_ls",
                 "ts_ls",
+                "tailwindcss",
+                "cssls",
+                -- Java
+                "jdtls",
+                -- Lua
+                "lua_ls",
+                -- C/C++
                 "clangd",
             },
             automatic_installation = true,
         })
 
-        require('mason-nvim-lint').setup({
+        require("mason-nvim-lint").setup({
             ensure_installed = {
-                'eslint_d',
-                'golangci-lint',
-                'checkstyle',
-                'shellcheck',
+                "eslint_d",
+                "golangci-lint",
+                "checkstyle",
+                "shellcheck",
             },
-            automatic_installation = true
+            automatic_installation = true,
         })
 
         require("mason-nvim-dap").setup({
             ensure_installed = {
+                -- Java debugging
                 "java-debug-adapter",
-                "java-test"
+                "java-test",
+                -- C/C++ debugging
+                "codelldb",
             },
             automatic_installation = true,
         })
