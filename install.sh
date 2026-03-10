@@ -335,6 +335,54 @@ install_python_tools() {
 }
 
 # Setup shell config (zsh/bash)
+setup_zsh_plugins() {
+    if [[ "$SHELL" != *"zsh"* ]] && [[ -z "$ZSH_VERSION" ]]; then
+        log_info "Not using zsh, skipping zsh plugins..."
+        return
+    fi
+
+    log_info "Setting up zsh plugins..."
+
+    # Install znap if not present
+    local znap_dir="$HOME/zsh-plugins/znap"
+    if [[ ! -d "$znap_dir" ]]; then
+        log_info "Installing znap (zsh plugin manager)..."
+        git clone --depth 1 https://github.com/marlonrichert/zsh-snap.git "$znap_dir"
+    fi
+
+    # Install z if not present
+    if [[ ! -f "$HOME/z/z.sh" ]]; then
+        log_info "Installing z (directory jumper)..."
+        git clone https://github.com/rupa/z.git "$HOME/z"
+    fi
+
+    # Check if zsh plugins are configured in zshrc
+    if ! grep -q "znap source zsh-users/zsh-autosuggestions" "$HOME/.zshrc" 2>/dev/null; then
+        log_info "Adding zsh plugins to .zshrc..."
+        cat >> "$HOME/.zshrc" << 'ZSHEOF'
+
+# === ZSH Plugins (auto-installed by pvim) ===
+# Znap plugin manager
+ZNAP_LOCATION=~/zsh-plugins/znap
+[[ -r $ZNAP_LOCATION/znap.zsh ]] || git clone --depth 1 https://github.com/marlonrichert/zsh-snap.git $ZNAP_LOCATION
+source $ZNAP_LOCATION/znap.zsh
+
+# zsh-autosuggestions (ghost text suggestions as you type)
+znap source zsh-users/zsh-autosuggestions
+
+# zsh-syntax-highlighting (colors for valid/invalid commands)
+znap source zsh-users/zsh-syntax-highlighting
+
+# z - directory jumper (use: z <partial-dir-name>)
+[[ -f ~/z/z.sh ]] || git clone https://github.com/rupa/z.git ~/z
+. ~/z/z.sh
+# === END ZSH Plugins ===
+ZSHEOF
+    fi
+
+    log_success "ZSH plugins configured"
+}
+
 setup_shell_config() {
     local shell_rc=""
     local shell_name=""
@@ -377,6 +425,9 @@ alias pvi='NVIM_APPNAME=pvim nvim'
 EOF
 
     log_success "Shell config updated: $shell_rc"
+
+    # Setup zsh plugins if using zsh
+    setup_zsh_plugins
 }
 
 # Setup pvim config
