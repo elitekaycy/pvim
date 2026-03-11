@@ -13,11 +13,31 @@ A personalized Neovim configuration tailored for a streamlined and efficient dev
 | `<leader><leader>` | Find files |
 | `<leader>fg` | Live grep (search in files) |
 | `<leader>fb` | Find buffers |
+| `<leader>fp` | Find projects |
 | `<leader>e` | Toggle file explorer |
+| `<leader>o` | Toggle code outline |
 | `<leader>ha` | Add file to Harpoon |
 | `<leader>hh` | Harpoon menu |
 | `<leader>1-5` | Jump to Harpoon file 1-5 |
 | `<S-h>` / `<S-l>` | Prev/next buffer |
+
+### Terminal
+
+| Key | Action |
+|-----|--------|
+| `<C-\>` | Toggle floating terminal |
+| `<leader>tf` | Float terminal |
+| `<leader>th` | Horizontal terminal |
+| `<leader>tv` | Vertical terminal |
+| `<leader>tg` | Lazygit in terminal |
+
+### Sessions
+
+| Key | Action |
+|-----|--------|
+| `<leader>qs` | Restore session (cwd) |
+| `<leader>ql` | Restore last session |
+| `<leader>qd` | Don't save session |
 
 ### Git
 
@@ -82,6 +102,27 @@ A personalized Neovim configuration tailored for a streamlined and efficient dev
 | `<leader>ca` | Code actions |
 | `<leader>rn` | Rename symbol |
 | `<leader>f` | Format file |
+| `zR` / `zM` | Open/close all folds |
+| `zK` | Peek fold preview |
+
+### Refactoring
+
+| Key | Action |
+|-----|--------|
+| `<leader>re` | Extract function (visual) |
+| `<leader>rv` | Extract variable (visual) |
+| `<leader>ri` | Inline variable |
+| `<leader>rb` | Extract block |
+| `<leader>rr` | Refactor menu |
+| `<leader>rp` | Debug print |
+
+### Colors (CSS)
+
+| Key | Action |
+|-----|--------|
+| `<leader>cp` | Color picker |
+| `<leader>cc` | Convert color format |
+| `<leader>ch` | Toggle color highlight |
 
 ### LSP & Diagnostics
 
@@ -148,6 +189,14 @@ A personalized Neovim configuration tailored for a streamlined and efficient dev
 - **Zen Mode:** Distraction-free coding
 - **Markdown Preview:** Live preview in browser
 - **Test Runner:** Modern test UI with Neotest
+- **Session Management:** Auto-save/restore sessions with persistence.nvim
+- **Project Management:** Quick project switching with telescope
+- **Floating Terminal:** Toggle terminal with toggleterm.nvim
+- **Refactoring:** Extract function/variable, inline with refactoring.nvim
+- **Code Outline:** Symbols sidebar with aerial.nvim
+- **Auto Pairs:** Auto-close brackets and quotes
+- **Modern Folds:** Peek preview with nvim-ufo
+- **Color Picker:** Pick/convert colors with ccc.nvim
 
 ## Quick Start
 
@@ -1006,6 +1055,149 @@ pvim includes syntax highlighting and snippets for Java template engines.
 | `assign` | Variable assignment |
 | `$` | `${variable}` interpolation |
 | `ftlpage` | Full FTL page template |
+
+## Session Management
+
+Auto-save and restore sessions per project directory.
+
+### Keybindings
+
+| Key | Action |
+|-----|--------|
+| `<leader>qs` | Restore session for cwd |
+| `<leader>ql` | Restore last session |
+| `<leader>qd` | Don't save current session |
+
+Sessions auto-restore when opening Neovim without arguments.
+
+## Project Management
+
+Quick switch between projects with Telescope integration.
+
+### Keybindings
+
+| Key | Action |
+|-----|--------|
+| `<leader>fp` | Find and switch projects |
+
+Projects are auto-detected by `.git`, `package.json`, `pom.xml`, etc.
+
+## Toggleterm (Terminal)
+
+Floating terminal with multiple instances.
+
+### Keybindings
+
+| Key | Action |
+|-----|--------|
+| `<C-\>` | Toggle terminal |
+| `<leader>tf` | Float terminal |
+| `<leader>th` | Horizontal terminal |
+| `<leader>tv` | Vertical terminal |
+| `<leader>t1-3` | Terminal 1/2/3 |
+| `<leader>tg` | Lazygit |
+| `<leader>tn` | Node REPL |
+| `<leader>tp` | Python REPL |
+
+### In Terminal
+
+| Key | Action |
+|-----|--------|
+| `<Esc>` | Exit to normal mode |
+| `<C-h/j/k/l>` | Navigate to window |
+
+## Refactoring
+
+Extract, inline, and debug print with treesitter support.
+
+### Keybindings
+
+| Key | Mode | Action |
+|-----|------|--------|
+| `<leader>re` | Visual | Extract function |
+| `<leader>rf` | Visual | Extract function to file |
+| `<leader>rv` | Visual | Extract variable |
+| `<leader>ri` | N/V | Inline variable |
+| `<leader>rb` | Normal | Extract block |
+| `<leader>rB` | Normal | Extract block to file |
+| `<leader>rr` | N/V | Refactor menu |
+| `<leader>rp` | Normal | Debug print |
+| `<leader>rP` | N/V | Debug print variable |
+| `<leader>rc` | Normal | Cleanup debug prints |
+
+## Aerial (Code Outline)
+
+Symbols sidebar for quick navigation.
+
+### Keybindings
+
+| Key | Action |
+|-----|--------|
+| `<leader>o` | Toggle outline |
+| `<leader>O` | Toggle outline nav |
+| `{` / `}` | Prev/next symbol |
+
+### In Outline
+
+| Key | Action |
+|-----|--------|
+| `<CR>` | Jump to symbol |
+| `o` / `za` | Toggle fold |
+| `l` / `h` | Open/close fold |
+| `q` | Close |
+
+## Auto Pairs
+
+Auto-close brackets, quotes, and more.
+
+- `()`, `[]`, `{}` auto-close
+- `""`, `''` auto-close
+- Fast wrap: `Alt+e` to wrap selection
+- Smart spaces inside brackets
+- Integrates with nvim-cmp
+
+## Modern Folds (UFO)
+
+Better folding with peek preview.
+
+### Keybindings
+
+| Key | Action |
+|-----|--------|
+| `zR` | Open all folds |
+| `zM` | Close all folds |
+| `zr` | Open folds except kinds |
+| `zm` | Close folds with level |
+| `zK` | Peek fold preview |
+
+Features:
+- Treesitter-based folding
+- Preview folded content
+- Shows line count in fold
+
+## Color Picker
+
+Pick, edit, and convert colors in CSS/code.
+
+### Keybindings
+
+| Key | Action |
+|-----|--------|
+| `<leader>cp` | Open color picker |
+| `<leader>cc` | Convert color format |
+| `<leader>ch` | Toggle color highlight |
+
+### In Picker
+
+| Key | Action |
+|-----|--------|
+| `h` / `l` | Decrease/increase value |
+| `i` | Toggle input mode (RGB/HSL/etc) |
+| `o` | Toggle output mode |
+| `<CR>` | Confirm |
+| `q` | Cancel |
+
+Supports: HEX, RGB, HSL, HWB, LAB, LCH, OKLCH, CMYK
 
 ## Project Structure
 
