@@ -1,39 +1,17 @@
 -- Exception snippets with context awareness
 local h = require("snippets.java.helpers")
-local s, fmt, i, f, c, t = h.s, h.fmt, h.i, h.f, h.c, h.t
+local s, fmt, f = h.s, h.fmt, h.f
 
 return {
-    -- ResourceNotFoundException
-    s("spring_exception_notfound_ctx", fmt([[
+    -- Custom Exception (uses class name)
+    -- In ResourceNotFoundException.java -> creates ResourceNotFoundException
+    s("spring_exception_ctx", fmt([[
 package {pkg}.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
-public class {class_name} extends RuntimeException {{
-
-    public {class_name}(String message) {{
-        super(message);
-    }}
-
-    public {class_name}(String message, Throwable cause) {{
-        super(message, cause);
-    }}
-}}
-]], {
-        pkg = f(function() return h.base_pkg() end),
-        class_name = f(function() return h.class_name() end),
-    })),
-
-    -- BadRequestException
-    s("spring_exception_badrequest_ctx", fmt([[
-package {pkg}.exception;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-@ResponseStatus(HttpStatus.BAD_REQUEST)
 public class {class_name} extends RuntimeException {{
 
     public {class_name}(String message) {{

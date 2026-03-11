@@ -1,6 +1,6 @@
 -- Common/utility snippets with context awareness
 local h = require("snippets.java.helpers")
-local s, fmt, i, f = h.s, h.fmt, h.i, h.f
+local s, fmt, f = h.s, h.fmt, h.f
 
 return {
     -- Package declaration
@@ -33,35 +33,28 @@ public class {class_name} {{
     s("spring_scheduled_ctx", fmt([[
 package {pkg}.scheduler;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class {class_name} {{
 
-    @Scheduled(cron = "{cron}")
-    public void {method}() {{
-        log.info("Running scheduled task: {class_name}");
-        {cursor}
+    @Scheduled(cron = "0 0 * * * *")
+    public void execute() {{
+        log.info("Running scheduled task");
     }}
 }}
 ]], {
         pkg = f(function() return h.base_pkg() end),
         class_name = f(function() return h.class_name() end),
-        cron = i(1, "0 0 * * * *"),
-        method = i(2, "execute"),
-        cursor = i(0),
     })),
 
     -- Event Listener
     s("spring_event_listener_ctx", fmt([[
 package {pkg}.event;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -69,21 +62,17 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class {class_name} {{
 
     @Async
     @EventListener
-    public void handle({event} event) {{
+    public void handle(Object event) {{
         log.info("Handling event: {{}}", event);
-        {cursor}
     }}
 }}
 ]], {
         pkg = f(function() return h.base_pkg() end),
         class_name = f(function() return h.class_name() end),
-        event = i(1, "CustomEvent"),
-        cursor = i(0),
     })),
 
     -- Custom Event
@@ -96,45 +85,16 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class {class_name} extends ApplicationEvent {{
 
-    private final {data_type} {data_field};
+    private final String data;
 
-    public {class_name}(Object source, {data_type} {data_field}) {{
+    public {class_name}(Object source, String data) {{
         super(source);
-        this.{data_field} = {data_field};
+        this.data = data;
     }}
 }}
 ]], {
         pkg = f(function() return h.base_pkg() end),
         class_name = f(function() return h.class_name() end),
-        data_type = i(1, "String"),
-        data_field = i(2, "data"),
-    })),
-
-    -- Feign Client
-    s("spring_feign_ctx", fmt([[
-package {pkg}.client;
-
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.*;
-
-@FeignClient(name = "{name}", url = "{url}")
-public interface {class_name} {{
-
-    @GetMapping("{endpoint}")
-    {response} get{method}();
-
-    @PostMapping("{endpoint}")
-    {response} create{method}(@RequestBody {request} request);
-}}
-]], {
-        pkg = f(function() return h.base_pkg() end),
-        class_name = f(function() return h.class_name() end),
-        name = i(1, "external-service"),
-        url = i(2, "${external.service.url}"),
-        endpoint = i(3, "/api/resource"),
-        response = i(4, "ResponseDto"),
-        method = i(5, "Resource"),
-        request = i(6, "RequestDto"),
     })),
 
     -- Aspect
@@ -151,10 +111,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class {class_name} {{
 
-    @Pointcut("{pointcut}")
-    public void targetMethods() {{}}
-
-    @Around("targetMethods()")
+    @Around("execution(* {pkg}.service.*.*(..))")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {{
         String methodName = joinPoint.getSignature().getName();
         log.debug("Before: {{}}", methodName);
@@ -170,6 +127,5 @@ public class {class_name} {{
 ]], {
         pkg = f(function() return h.base_pkg() end),
         class_name = f(function() return h.class_name() end),
-        pointcut = i(1, "execution(* com.example.service.*.*(..))"),
     })),
 }

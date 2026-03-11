@@ -4,6 +4,7 @@ local s, fmt, i, f = h.s, h.fmt, h.i, h.f
 
 return {
     -- REST Controller with CRUD
+    -- In UserController.java -> uses User as entity, imports UserDto, UserService
     s("spring_controller_ctx", fmt([[
 package {pkg}.controller;
 
@@ -22,49 +23,47 @@ import java.util.List;
 @RequiredArgsConstructor
 public class {class_name} {{
 
-    private final {entity}Service service;
+    private final {entity}Service {entity_var}Service;
 
     @GetMapping
     public ResponseEntity<List<{entity}Dto>> getAll() {{
-        return ResponseEntity.ok(service.findAll());
+        return ResponseEntity.ok({entity_var}Service.findAll());
     }}
 
     @GetMapping("/{{id}}")
     public ResponseEntity<{entity}Dto> getById(@PathVariable Long id) {{
-        return ResponseEntity.ok(service.findById(id));
+        return ResponseEntity.ok({entity_var}Service.findById(id));
     }}
 
     @PostMapping
     public ResponseEntity<{entity}Dto> create(@Valid @RequestBody {entity}Dto dto) {{
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body({entity_var}Service.create(dto));
     }}
 
     @PutMapping("/{{id}}")
     public ResponseEntity<{entity}Dto> update(@PathVariable Long id, @Valid @RequestBody {entity}Dto dto) {{
-        return ResponseEntity.ok(service.update(id, dto));
+        return ResponseEntity.ok({entity_var}Service.update(id, dto));
     }}
 
     @DeleteMapping("/{{id}}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {{
-        service.delete(id);
+        {entity_var}Service.delete(id);
         return ResponseEntity.noContent().build();
     }}
 }}
 ]], {
         pkg = f(function() return h.base_pkg() end),
-        entity = i(1, "Entity"),
-        endpoint = i(2, "entities"),
+        entity = f(function() return h.entity_name() end),
+        entity_var = f(function() return h.entity_var() end),
+        endpoint = f(function() return h.endpoint() end),
         class_name = f(function() return h.class_name() end),
-    }, { repeat_duplicates = true })),
+    })),
 
-    -- Controller with Pagination
-    s("spring_controller_page_ctx", fmt([[
+    -- Simple Controller (no service dependency)
+    s("spring_controller_simple_ctx", fmt([[
 package {pkg}.controller;
 
-import {pkg}.dto.{entity}Dto;
-import {pkg}.service.{entity}Service;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -73,30 +72,20 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class {class_name} {{
 
-    private final {entity}Service service;
-
     @GetMapping
-    public ResponseEntity<Page<{entity}Dto>> getAll(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir) {{
-        Sort sort = sortDir.equalsIgnoreCase("asc")
-            ? Sort.by(sortBy).ascending()
-            : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(page, size, sort);
-        return ResponseEntity.ok(service.findAll(pageable));
+    public ResponseEntity<String> get() {{
+        return ResponseEntity.ok("Hello from {entity}");
     }}
 
     @GetMapping("/{{id}}")
-    public ResponseEntity<{entity}Dto> getById(@PathVariable Long id) {{
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<String> getById(@PathVariable Long id) {{
+        return ResponseEntity.ok("{entity} " + id);
     }}
 }}
 ]], {
         pkg = f(function() return h.base_pkg() end),
-        entity = i(1, "Entity"),
-        endpoint = i(2, "entities"),
+        endpoint = f(function() return h.endpoint() end),
         class_name = f(function() return h.class_name() end),
-    }, { repeat_duplicates = true })),
+        entity = f(function() return h.entity_name() end),
+    })),
 }

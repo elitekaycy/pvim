@@ -4,6 +4,7 @@ local s, fmt, i, f = h.s, h.fmt, h.i, h.f
 
 return {
     -- DTO with Lombok
+    -- In UserDto.java -> creates UserDto class
     s("spring_dto_ctx", fmt([[
 package {pkg}.dto;
 
@@ -16,12 +17,10 @@ import lombok.*;
 public class {class_name} {{
 
     private Long id;
-    {cursor}
 }}
 ]], {
         pkg = f(function() return h.base_pkg() end),
         class_name = f(function() return h.class_name() end),
-        cursor = i(0),
     })),
 
     -- Record DTO
@@ -29,15 +28,14 @@ public class {class_name} {{
 package {pkg}.dto;
 
 public record {class_name}(
-    Long id{cursor}
+    Long id
 ) {{}}
 ]], {
         pkg = f(function() return h.base_pkg() end),
         class_name = f(function() return h.class_name() end),
-        cursor = i(0),
     })),
 
-    -- Request DTO
+    -- Request DTO with validation
     s("spring_request_ctx", fmt([[
 package {pkg}.dto;
 
@@ -50,19 +48,15 @@ import lombok.*;
 @AllArgsConstructor
 public class {class_name} {{
 
-    @NotBlank(message = "{field} is required")
-    private String {field_var};
-    {cursor}
+    @NotBlank(message = "Name is required")
+    private String name;
 }}
 ]], {
         pkg = f(function() return h.base_pkg() end),
         class_name = f(function() return h.class_name() end),
-        field = i(1, "name"),
-        field_var = f(function(args) return h.lowercase_first(args[1][1]) end, {1}),
-        cursor = i(0),
     })),
 
-    -- Response DTO
+    -- Response DTO with timestamps
     s("spring_response_ctx", fmt([[
 package {pkg}.dto;
 
@@ -76,13 +70,11 @@ import java.time.LocalDateTime;
 public class {class_name} {{
 
     private Long id;
-    {cursor}
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }}
 ]], {
         pkg = f(function() return h.base_pkg() end),
         class_name = f(function() return h.class_name() end),
-        cursor = i(0),
     })),
 }

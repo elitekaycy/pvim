@@ -1,9 +1,10 @@
 -- Entity snippets with context awareness
 local h = require("snippets.java.helpers")
-local s, fmt, i, f, rep = h.s, h.fmt, h.i, h.f, h.rep
+local s, fmt, i, f = h.s, h.fmt, h.i, h.f
 
 return {
     -- Entity with Lombok
+    -- In User.java -> creates User entity with users table
     s("spring_entity_ctx", fmt([[
 package {pkg}.entity;
 
@@ -27,9 +28,6 @@ public class {class_name} implements Serializable {{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "{field}", nullable = false)
-    private String {field_var};
-
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
@@ -49,10 +47,33 @@ public class {class_name} implements Serializable {{
 }}
 ]], {
         pkg = f(function() return h.base_pkg() end),
-        table = i(1, "table_name"),
+        table = f(function() return h.table_name() end),
         class_name = f(function() return h.class_name() end),
-        field = i(2, "name"),
-        field_var = rep(2),
+    })),
+
+    -- Simple Entity (minimal)
+    s("spring_entity_simple_ctx", fmt([[
+package {pkg}.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "{table}")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class {class_name} {{
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+}}
+]], {
+        pkg = f(function() return h.base_pkg() end),
+        table = f(function() return h.table_name() end),
+        class_name = f(function() return h.class_name() end),
     })),
 
     -- Auditable Base Entity
