@@ -11,10 +11,19 @@ local triggers = require("suggestion.ghost.triggers")
 ---@field triggers string[] Enabled trigger types
 ---@field min_score number Minimum score for suggestions
 
+-- Supported filetypes for suggestions
+local SUPPORTED_FILETYPES = {
+    java = true,
+    typescript = true,
+    typescriptreact = true,
+    javascript = true,
+    javascriptreact = true,
+}
+
 local state = {
     config = {
         enabled = true,
-        debounce_ms = 300,  -- Longer debounce for less API spam
+        debounce_ms = 500,  -- Longer debounce for less API spam
         triggers = { "method_body", "statement", "expression", "class_scaffold" },
         min_score = 20,
     },
@@ -22,6 +31,7 @@ local state = {
     augroup = nil,
     initialized = false,
     pending_request = false,  -- Track if request is in flight
+    last_trigger_time = 0,    -- Track last trigger for rate limiting
 }
 
 ---Generate suggestions for a trigger
@@ -262,16 +272,37 @@ local function setup_autocmds()
     vim.api.nvim_create_autocmd("TextChangedI", {
         group = state.augroup,
         callback = function(ev)
+            -- Early exit checks (cheapest first)
             if not state.config.enabled then
                 return
             end
 
-            -- Debounce
+            -- Check filetype (avoid processing unsupported files)
+            local ft = vim.bo[ev.buf].filetype
+            if not SUPPORTED_FILETYPES[ft] then
+                return
+            end
+
+            -- Skip if request already in flight
+            if state.pending_request then
+                return
+            end
+
+            -- Rate limiting - minimum 200ms between triggers
+            local now = vim.loop.now()
+            if now - state.last_trigger_time < 200 then
+                return
+            end
+
+            -- Debounce - reuse existing timer if possible
             if state.debounce_timer then
                 vim.fn.timer_stop(state.debounce_timer)
+                state.debounce_timer = nil
             end
 
             state.debounce_timer = vim.fn.timer_start(state.config.debounce_ms, function()
+                state.debounce_timer = nil
+                state.last_trigger_time = vim.loop.now()
                 vim.schedule(function()
                     on_text_changed(ev.buf)
                 end)
@@ -301,6 +332,14 @@ local function setup_autocmds()
         group = state.augroup,
         callback = function()
             renderer.clear()
+        end,
+    })
+
+    -- BufDelete/BufUnload - cleanup buffer caches to prevent memory leaks
+    vim.api.nvim_create_autocmd({ "BufDelete", "BufUnload" }, {
+        group = state.augroup,
+        callback = function(ev)
+            triggers.clear_cache(ev.buf)
         end,
     })
 end
@@ -363,6 +402,12 @@ end
 ---Disable ghost text
 function M.disable()
     state.config.enabled = false
+    -- Clean up timer to prevent memory leak
+    if state.debounce_timer then
+        vim.fn.timer_stop(state.debounce_timer)
+        state.debounce_timer = nil
+    end
+    state.pending_request = false
     renderer.clear()
 end
 

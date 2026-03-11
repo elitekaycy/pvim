@@ -2,6 +2,25 @@
 -- Detects when to show suggestions based on cursor context
 local M = {}
 
+-- Buffer-local cache for expensive operations
+local buffer_cache = {}
+
+-- Clear cache for a buffer
+local function clear_buffer_cache(bufnr)
+    buffer_cache[bufnr] = nil
+end
+
+-- Get or create buffer cache
+local function get_buffer_cache(bufnr)
+    if not buffer_cache[bufnr] then
+        buffer_cache[bufnr] = {
+            class_info = nil,
+            class_info_line_count = 0,  -- Invalidate if line count changes significantly
+        }
+    end
+    return buffer_cache[bufnr]
+end
+
 ---@class TriggerResult
 ---@field type string Trigger type (method_body, statement, expression, class_scaffold)
 ---@field method_name string|nil Method name if detected
@@ -205,38 +224,69 @@ end
 ---@param line_num number Current line number (1-indexed)
 ---@return TriggerResult|nil
 local function check_class_scaffold_trigger(bufnr, line_num)
-    local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-    local content = table.concat(lines, "\n")
+    local line_count = vim.api.nvim_buf_line_count(bufnr)
 
-    -- Check for empty class body
-    -- Pattern: class ClassName { } with cursor inside
-    local class_pattern = "class%s+(%w+).-{%s*}"
-    local class_name = content:match(class_pattern)
-
-    if class_name then
-        -- Verify cursor is inside the empty body
-        local before_cursor = table.concat(vim.api.nvim_buf_get_lines(bufnr, 0, line_num, false), "\n")
-        if before_cursor:match("class%s+" .. class_name .. ".-{%s*$") then
-            return {
-                type = "class_scaffold",
-                context = {
-                    class_name = class_name,
-                },
-            }
-        end
+    -- Quick check: skip for large files (class scaffold only useful in small/new files)
+    if line_count > 20 then
+        return nil
     end
 
-    -- Check for new file (very few lines, no content)
-    if #lines <= 3 then
+    local cache = get_buffer_cache(bufnr)
+
+    -- Check for new file (very few lines, no content) - cheapest check first
+    if line_count <= 3 then
+        -- Only read the lines we need
+        local lines = vim.api.nvim_buf_get_lines(bufnr, 0, 3, false)
         local total_content = table.concat(lines, "")
         if #total_content < 50 then
-            -- Get filename for context
             local filename = vim.fn.expand("%:t:r")
             return {
                 type = "class_scaffold",
                 context = {
                     class_name = filename,
                     new_file = true,
+                },
+            }
+        end
+    end
+
+    -- Use cache for class info if line count hasn't changed much
+    if cache.class_info and math.abs(cache.class_info_line_count - line_count) < 3 then
+        local class_name = cache.class_info.class_name
+        if class_name then
+            -- Just check if cursor is in the right position
+            local before_lines = vim.api.nvim_buf_get_lines(bufnr, 0, line_num, false)
+            local before_cursor = table.concat(before_lines, "\n")
+            if before_cursor:match("class%s+" .. class_name .. ".-{%s*$") then
+                return {
+                    type = "class_scaffold",
+                    context = {
+                        class_name = class_name,
+                    },
+                }
+            end
+        end
+        return nil
+    end
+
+    -- Cache miss - scan file (only for small files due to early exit above)
+    local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+    local content = table.concat(lines, "\n")
+
+    local class_pattern = "class%s+(%w+).-{%s*}"
+    local class_name = content:match(class_pattern)
+
+    -- Update cache
+    cache.class_info = { class_name = class_name }
+    cache.class_info_line_count = line_count
+
+    if class_name then
+        local before_cursor = table.concat(vim.api.nvim_buf_get_lines(bufnr, 0, line_num, false), "\n")
+        if before_cursor:match("class%s+" .. class_name .. ".-{%s*$") then
+            return {
+                type = "class_scaffold",
+                context = {
+                    class_name = class_name,
                 },
             }
         end
@@ -310,6 +360,12 @@ function M.is_enabled(trigger_type, enabled_triggers)
         end
     end
     return false
+end
+
+---Clear cache for a buffer (call on BufDelete/BufUnload)
+---@param bufnr number
+function M.clear_cache(bufnr)
+    clear_buffer_cache(bufnr)
 end
 
 return M
