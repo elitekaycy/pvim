@@ -28,3 +28,10 @@ require("core.lazy")
 require("core.autocommand").setup()
 
 require("keybinding")
+
+-- Start server for remote theme switching (theme switcher uses this)
+local server_addr = vim.env.NVIM_LISTEN_ADDRESS
+if not server_addr then
+    local socket_path = "/tmp/pvim-" .. vim.fn.getpid()
+    pcall(vim.fn.serverstart, socket_path)
+end
