@@ -4,77 +4,138 @@ local theme_file = vim.fn.stdpath("data") .. "/pvim_theme.txt"
 -- Available themes configuration
 -- transparent = true means force transparent background overrides
 -- transparent = false means let the theme control its own background
+-- Themes ending in "-solid" have their own backgrounds (not transparent)
 local themes = {
-    -- Dark themes with transparency
+    -- Kanagawa
     { name = "kanagawa", colorscheme = "kanagawa", transparent = true, setup = function()
         require("kanagawa").setup({ transparent = true })
+    end },
+    { name = "kanagawa-solid", colorscheme = "kanagawa", transparent = false, setup = function()
+        require("kanagawa").setup({ transparent = false })
     end },
     { name = "kanagawa-wave", colorscheme = "kanagawa-wave", transparent = true, setup = function()
         require("kanagawa").setup({ transparent = true })
     end },
+    { name = "kanagawa-wave-solid", colorscheme = "kanagawa-wave", transparent = false, setup = function()
+        require("kanagawa").setup({ transparent = false })
+    end },
     { name = "kanagawa-dragon", colorscheme = "kanagawa-dragon", transparent = true, setup = function()
         require("kanagawa").setup({ transparent = true })
+    end },
+    { name = "kanagawa-dragon-solid", colorscheme = "kanagawa-dragon", transparent = false, setup = function()
+        require("kanagawa").setup({ transparent = false })
     end },
     { name = "kanagawa-lotus", colorscheme = "kanagawa-lotus", transparent = false, setup = function()
         require("kanagawa").setup({ transparent = false })
     end },
+    -- Tokyonight
     { name = "tokyonight", colorscheme = "tokyonight", transparent = true, setup = function()
         require("tokyonight").setup({ transparent = true })
+    end },
+    { name = "tokyonight-solid", colorscheme = "tokyonight", transparent = false, setup = function()
+        require("tokyonight").setup({ transparent = false })
     end },
     { name = "tokyonight-night", colorscheme = "tokyonight-night", transparent = true, setup = function()
         require("tokyonight").setup({ transparent = true })
     end },
+    { name = "tokyonight-night-solid", colorscheme = "tokyonight-night", transparent = false, setup = function()
+        require("tokyonight").setup({ transparent = false })
+    end },
     { name = "tokyonight-storm", colorscheme = "tokyonight-storm", transparent = true, setup = function()
         require("tokyonight").setup({ transparent = true })
+    end },
+    { name = "tokyonight-storm-solid", colorscheme = "tokyonight-storm", transparent = false, setup = function()
+        require("tokyonight").setup({ transparent = false })
     end },
     { name = "tokyonight-moon", colorscheme = "tokyonight-moon", transparent = true, setup = function()
         require("tokyonight").setup({ transparent = true })
     end },
+    { name = "tokyonight-moon-solid", colorscheme = "tokyonight-moon", transparent = false, setup = function()
+        require("tokyonight").setup({ transparent = false })
+    end },
     { name = "tokyonight-day", colorscheme = "tokyonight-day", transparent = false, setup = function()
         require("tokyonight").setup({ transparent = false })
     end },
+    -- Catppuccin
     { name = "catppuccin", colorscheme = "catppuccin", transparent = true, setup = function()
         require("catppuccin").setup({ transparent_background = true })
+    end },
+    { name = "catppuccin-solid", colorscheme = "catppuccin", transparent = false, setup = function()
+        require("catppuccin").setup({ transparent_background = false })
     end },
     { name = "catppuccin-mocha", colorscheme = "catppuccin-mocha", transparent = true, setup = function()
         require("catppuccin").setup({ transparent_background = true })
     end },
+    { name = "catppuccin-mocha-solid", colorscheme = "catppuccin-mocha", transparent = false, setup = function()
+        require("catppuccin").setup({ transparent_background = false })
+    end },
     { name = "catppuccin-macchiato", colorscheme = "catppuccin-macchiato", transparent = true, setup = function()
         require("catppuccin").setup({ transparent_background = true })
+    end },
+    { name = "catppuccin-macchiato-solid", colorscheme = "catppuccin-macchiato", transparent = false, setup = function()
+        require("catppuccin").setup({ transparent_background = false })
     end },
     { name = "catppuccin-frappe", colorscheme = "catppuccin-frappe", transparent = true, setup = function()
         require("catppuccin").setup({ transparent_background = true })
     end },
+    { name = "catppuccin-frappe-solid", colorscheme = "catppuccin-frappe", transparent = false, setup = function()
+        require("catppuccin").setup({ transparent_background = false })
+    end },
     { name = "catppuccin-latte", colorscheme = "catppuccin-latte", transparent = false, setup = function()
         require("catppuccin").setup({ transparent_background = false })
     end },
+    -- Gruvbox
     { name = "gruvbox", colorscheme = "gruvbox", transparent = true, setup = function()
         require("gruvbox").setup({ transparent_mode = true })
+    end },
+    { name = "gruvbox-solid", colorscheme = "gruvbox", transparent = false, setup = function()
+        require("gruvbox").setup({ transparent_mode = false })
     end },
     { name = "gruvbox-light", colorscheme = "gruvbox", transparent = false, setup = function()
         vim.o.background = "light"
         require("gruvbox").setup({ transparent_mode = false })
     end },
+    -- Onedark
     { name = "onedark", colorscheme = "onedark", transparent = true, setup = function()
         require("onedark").setup({ style = "dark", transparent = true })
     end },
+    { name = "onedark-solid", colorscheme = "onedark", transparent = false, setup = function()
+        require("onedark").setup({ style = "dark", transparent = false })
+    end },
+    -- Rose-pine
     { name = "rose-pine", colorscheme = "rose-pine", transparent = true, setup = function()
         require("rose-pine").setup({ disable_background = true })
+    end },
+    { name = "rose-pine-solid", colorscheme = "rose-pine", transparent = false, setup = function()
+        require("rose-pine").setup({ disable_background = false })
     end },
     { name = "rose-pine-moon", colorscheme = "rose-pine-moon", transparent = true, setup = function()
         require("rose-pine").setup({ disable_background = true })
     end },
+    { name = "rose-pine-moon-solid", colorscheme = "rose-pine-moon", transparent = false, setup = function()
+        require("rose-pine").setup({ disable_background = false })
+    end },
     { name = "rose-pine-dawn", colorscheme = "rose-pine-dawn", transparent = false, setup = function()
         require("rose-pine").setup({ disable_background = false })
     end },
+    -- Nightfox family
     { name = "nightfox", colorscheme = "nightfox", transparent = true, setup = function()
         require("nightfox").setup({ options = { transparent = true } })
+    end },
+    { name = "nightfox-solid", colorscheme = "nightfox", transparent = false, setup = function()
+        require("nightfox").setup({ options = { transparent = false } })
     end },
     { name = "carbonfox", colorscheme = "carbonfox", transparent = true, setup = function()
         require("nightfox").setup({ options = { transparent = true } })
     end },
+    { name = "carbonfox-solid", colorscheme = "carbonfox", transparent = false, setup = function()
+        require("nightfox").setup({ options = { transparent = false } })
+    end },
     { name = "terafox", colorscheme = "terafox", transparent = true, setup = function()
         require("nightfox").setup({ options = { transparent = true } })
+    end },
+    { name = "terafox-solid", colorscheme = "terafox", transparent = false, setup = function()
+        require("nightfox").setup({ options = { transparent = false } })
     end },
     { name = "dayfox", colorscheme = "dayfox", transparent = false, setup = function()
         require("nightfox").setup({ options = { transparent = false } })
@@ -87,11 +148,20 @@ local themes = {
     { name = "github-dark", colorscheme = "github_dark", transparent = true, setup = function()
         require("github-theme").setup({ options = { transparent = true } })
     end },
+    { name = "github-dark-solid", colorscheme = "github_dark", transparent = false, setup = function()
+        require("github-theme").setup({ options = { transparent = false } })
+    end },
     { name = "github-dimmed", colorscheme = "github_dark_dimmed", transparent = true, setup = function()
         require("github-theme").setup({ options = { transparent = true } })
     end },
+    { name = "github-dimmed-solid", colorscheme = "github_dark_dimmed", transparent = false, setup = function()
+        require("github-theme").setup({ options = { transparent = false } })
+    end },
     { name = "github-dark-high-contrast", colorscheme = "github_dark_high_contrast", transparent = true, setup = function()
         require("github-theme").setup({ options = { transparent = true } })
+    end },
+    { name = "github-dark-high-contrast-solid", colorscheme = "github_dark_high_contrast", transparent = false, setup = function()
+        require("github-theme").setup({ options = { transparent = false } })
     end },
     { name = "github-light", colorscheme = "github_light", transparent = false, setup = function()
         require("github-theme").setup({ options = { transparent = false } })
