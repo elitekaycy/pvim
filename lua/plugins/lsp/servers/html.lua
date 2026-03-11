@@ -13,24 +13,20 @@ vim.filetype.add({
     },
 })
 
--- Set ftl to be treated like html for syntax highlighting
+-- Set ftl syntax (custom FreeMarker syntax extending HTML)
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     pattern = "*.ftl",
     callback = function()
         vim.bo.filetype = "ftl"
-        vim.cmd("setlocal syntax=html")
+        vim.cmd("setlocal syntax=ftl")
     end,
 })
 
--- Set jsp/jspx to be treated like html for syntax highlighting
+-- Set jsp syntax (custom JSP syntax extending HTML with JSTL/EL/Spring)
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     pattern = { "*.jsp", "*.jspx", "*.jspf", "*.tag" },
     callback = function()
         vim.cmd("setlocal syntax=jsp")
-        -- Fallback to HTML syntax if JSP syntax not available
-        if vim.fn.exists("b:current_syntax") == 0 then
-            vim.cmd("setlocal syntax=html")
-        end
     end,
 })
 
