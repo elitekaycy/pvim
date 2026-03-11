@@ -21,6 +21,12 @@ return {
 		-- Load dynamic Lua snippets (context-aware)
 		require("luasnip.loaders.from_lua").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets/luasnippets" } })
 
+		-- Register project indexer cmp source
+		local ok, cmp_source = pcall(require, "indexer.cmp_source")
+		if ok then
+			cmp_source.register()
+		end
+
 		cmp.setup({
 			snippet = {
 				expand = function(args)
@@ -57,6 +63,7 @@ return {
 			}),
 			sources = {
 				{ name = "nvim_lsp" },
+				{ name = "project_index" }, -- Project-aware suggestions
 				{ name = "buffer" },
 				{ name = "path" },
 				{ name = "luasnip" },
@@ -66,6 +73,7 @@ return {
 				format = function(entry, vim_item)
 					vim_item.menu = ({
 						nvim_lsp = "[LSP]",
+						project_index = "[Index]",
 						buffer = "[Buffer]",
 						path = "[Path]",
 						luasnip = "[Snip]",

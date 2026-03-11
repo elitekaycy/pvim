@@ -1,4 +1,5 @@
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
+local codelens = require("utils.codelens")
 
 -- Get jdtls paths - check mason install path directly for reliability
 local function get_jdtls_paths()
@@ -238,8 +239,14 @@ local function setup_jdtls()
             require("jdtls").setup_dap({ hotcodereplace = "auto" })
             require("jdtls.dap").setup_dap_main_class_configs()
 
+            -- Setup CodeLens (Run/Debug buttons, reference counts)
+            codelens.on_attach(client, bufnr)
+
             -- LSP Keybindings
             local opts = { buffer = bufnr, silent = true }
+
+            -- CodeLens
+            vim.keymap.set("n", "<Leader>cl", vim.lsp.codelens.run, vim.tbl_extend("force", opts, { desc = "Run CodeLens" }))
 
             vim.keymap.set("n", "gd", vim.lsp.buf.definition, vim.tbl_extend("force", opts, { desc = "Go to Definition" }))
             vim.keymap.set("n", "gD", vim.lsp.buf.declaration, vim.tbl_extend("force", opts, { desc = "Go to Declaration" }))
