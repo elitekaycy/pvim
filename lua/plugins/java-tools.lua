@@ -2,8 +2,10 @@
 -- Provides commands for generating Spring Boot modules
 
 return {
-    "nvim-lua/plenary.nvim", -- dependency for file operations
+    dir = vim.fn.stdpath("config") .. "/lua/util",
+    name = "java-tools",
     ft = "java",
+    dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
         local generator = require("util.java-generator")
         local project = require("util.java-project")
