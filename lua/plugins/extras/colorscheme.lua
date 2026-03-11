@@ -136,6 +136,53 @@ local themes = {
     { name = "fluoromachine", colorscheme = "fluoromachine", setup = function()
         require("fluoromachine").setup({ transparent = true, glow = true })
     end },
+    -- Evangelion theme
+    { name = "evangelion", colorscheme = "evangelion", setup = function() end },
+    -- Noctis themes (dark and light variants)
+    { name = "noctis", colorscheme = "noctis", setup = function()
+        require("noctis").setup({})
+    end },
+    { name = "noctis-azureus", colorscheme = "noctis-azureus", setup = function()
+        require("noctis").setup({})
+    end },
+    { name = "noctis-bordo", colorscheme = "noctis-bordo", setup = function()
+        require("noctis").setup({})
+    end },
+    { name = "noctis-minimus", colorscheme = "noctis-minimus", setup = function()
+        require("noctis").setup({})
+    end },
+    { name = "noctis-uva", colorscheme = "noctis-uva", setup = function()
+        require("noctis").setup({})
+    end },
+    { name = "noctis-viola", colorscheme = "noctis-viola", setup = function()
+        require("noctis").setup({})
+    end },
+    { name = "noctis-lux", colorscheme = "noctis-lux", setup = function()
+        require("noctis").setup({})
+    end },
+    { name = "noctis-lilac", colorscheme = "noctis-lilac", setup = function()
+        require("noctis").setup({})
+    end },
+    { name = "noctis-hibernus", colorscheme = "noctis-hibernus", setup = function()
+        require("noctis").setup({})
+    end },
+    -- Min Theme (minimal)
+    { name = "min-theme", colorscheme = "min-theme", setup = function()
+        require("min-theme").setup({ theme = "dark", transparent = true })
+    end },
+    { name = "min-theme-light", colorscheme = "min-theme", setup = function()
+        require("min-theme").setup({ theme = "light", transparent = false })
+    end },
+    -- GitHub additional variants
+    { name = "github-dark-high-contrast", colorscheme = "github_dark_high_contrast", setup = function()
+        require("github-theme").setup({ options = { transparent = true } })
+    end },
+    { name = "github-light", colorscheme = "github_light", setup = function()
+        require("github-theme").setup({ options = { transparent = false } })
+    end },
+    { name = "github-light-high-contrast", colorscheme = "github_light_high_contrast", setup = function()
+        require("github-theme").setup({ options = { transparent = false } })
+    end },
 }
 
 -- Load saved theme (with proper error handling)
@@ -193,6 +240,9 @@ local theme_plugins = {
     ["poimandres"] = "poimandres.nvim",
     ["cyberdream"] = "cyberdream.nvim",
     ["fluoromachine"] = "fluoromachine.nvim",
+    ["evangelion"] = "evangelion.nvim",
+    ["noctis"] = "noctis.nvim",
+    ["min-theme"] = "min-theme.nvim",
 }
 
 -- Load theme plugin if lazy loaded
@@ -319,6 +369,10 @@ return {
     { "olivercederborg/poimandres.nvim", lazy = true },
     { "scottmckendry/cyberdream.nvim", lazy = true },
     { "maxmx03/fluoromachine.nvim", lazy = true },
+    -- New themes
+    { "xero/evangelion.nvim", lazy = true },
+    { "kartikp10/noctis.nvim", lazy = true },
+    { "datsfilipe/min-theme.nvim", lazy = true },
     -- Load saved theme on startup
     {
         "nvim-lua/plenary.nvim",
