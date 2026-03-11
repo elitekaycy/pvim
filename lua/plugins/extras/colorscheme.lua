@@ -2,186 +2,224 @@
 local theme_file = vim.fn.stdpath("data") .. "/pvim_theme.txt"
 
 -- Available themes configuration
+-- transparent = true means force transparent background overrides
+-- transparent = false means let the theme control its own background
 local themes = {
-    { name = "kanagawa", colorscheme = "kanagawa", setup = function()
+    -- Dark themes with transparency
+    { name = "kanagawa", colorscheme = "kanagawa", transparent = true, setup = function()
         require("kanagawa").setup({ transparent = true })
     end },
-    { name = "kanagawa-wave", colorscheme = "kanagawa-wave", setup = function()
+    { name = "kanagawa-wave", colorscheme = "kanagawa-wave", transparent = true, setup = function()
         require("kanagawa").setup({ transparent = true })
     end },
-    { name = "kanagawa-dragon", colorscheme = "kanagawa-dragon", setup = function()
+    { name = "kanagawa-dragon", colorscheme = "kanagawa-dragon", transparent = true, setup = function()
         require("kanagawa").setup({ transparent = true })
     end },
-    { name = "kanagawa-lotus", colorscheme = "kanagawa-lotus", setup = function()
+    { name = "kanagawa-lotus", colorscheme = "kanagawa-lotus", transparent = false, setup = function()
         require("kanagawa").setup({ transparent = false })
     end },
-    { name = "tokyonight", colorscheme = "tokyonight", setup = function()
+    { name = "tokyonight", colorscheme = "tokyonight", transparent = true, setup = function()
         require("tokyonight").setup({ transparent = true })
     end },
-    { name = "tokyonight-night", colorscheme = "tokyonight-night", setup = function()
+    { name = "tokyonight-night", colorscheme = "tokyonight-night", transparent = true, setup = function()
         require("tokyonight").setup({ transparent = true })
     end },
-    { name = "tokyonight-storm", colorscheme = "tokyonight-storm", setup = function()
+    { name = "tokyonight-storm", colorscheme = "tokyonight-storm", transparent = true, setup = function()
         require("tokyonight").setup({ transparent = true })
     end },
-    { name = "tokyonight-moon", colorscheme = "tokyonight-moon", setup = function()
+    { name = "tokyonight-moon", colorscheme = "tokyonight-moon", transparent = true, setup = function()
         require("tokyonight").setup({ transparent = true })
     end },
-    { name = "catppuccin", colorscheme = "catppuccin", setup = function()
+    { name = "tokyonight-day", colorscheme = "tokyonight-day", transparent = false, setup = function()
+        require("tokyonight").setup({ transparent = false })
+    end },
+    { name = "catppuccin", colorscheme = "catppuccin", transparent = true, setup = function()
         require("catppuccin").setup({ transparent_background = true })
     end },
-    { name = "catppuccin-mocha", colorscheme = "catppuccin-mocha", setup = function()
+    { name = "catppuccin-mocha", colorscheme = "catppuccin-mocha", transparent = true, setup = function()
         require("catppuccin").setup({ transparent_background = true })
     end },
-    { name = "catppuccin-macchiato", colorscheme = "catppuccin-macchiato", setup = function()
+    { name = "catppuccin-macchiato", colorscheme = "catppuccin-macchiato", transparent = true, setup = function()
         require("catppuccin").setup({ transparent_background = true })
     end },
-    { name = "catppuccin-frappe", colorscheme = "catppuccin-frappe", setup = function()
+    { name = "catppuccin-frappe", colorscheme = "catppuccin-frappe", transparent = true, setup = function()
         require("catppuccin").setup({ transparent_background = true })
     end },
-    { name = "catppuccin-latte", colorscheme = "catppuccin-latte", setup = function()
+    { name = "catppuccin-latte", colorscheme = "catppuccin-latte", transparent = false, setup = function()
         require("catppuccin").setup({ transparent_background = false })
     end },
-    { name = "gruvbox", colorscheme = "gruvbox", setup = function()
+    { name = "gruvbox", colorscheme = "gruvbox", transparent = true, setup = function()
         require("gruvbox").setup({ transparent_mode = true })
     end },
-    { name = "onedark", colorscheme = "onedark", setup = function()
+    { name = "gruvbox-light", colorscheme = "gruvbox", transparent = false, setup = function()
+        vim.o.background = "light"
+        require("gruvbox").setup({ transparent_mode = false })
+    end },
+    { name = "onedark", colorscheme = "onedark", transparent = true, setup = function()
         require("onedark").setup({ style = "dark", transparent = true })
     end },
-    { name = "rose-pine", colorscheme = "rose-pine", setup = function()
+    { name = "rose-pine", colorscheme = "rose-pine", transparent = true, setup = function()
         require("rose-pine").setup({ disable_background = true })
     end },
-    { name = "rose-pine-moon", colorscheme = "rose-pine-moon", setup = function()
+    { name = "rose-pine-moon", colorscheme = "rose-pine-moon", transparent = true, setup = function()
         require("rose-pine").setup({ disable_background = true })
     end },
-    { name = "nightfox", colorscheme = "nightfox", setup = function()
+    { name = "rose-pine-dawn", colorscheme = "rose-pine-dawn", transparent = false, setup = function()
+        require("rose-pine").setup({ disable_background = false })
+    end },
+    { name = "nightfox", colorscheme = "nightfox", transparent = true, setup = function()
         require("nightfox").setup({ options = { transparent = true } })
     end },
-    { name = "carbonfox", colorscheme = "carbonfox", setup = function()
+    { name = "carbonfox", colorscheme = "carbonfox", transparent = true, setup = function()
         require("nightfox").setup({ options = { transparent = true } })
     end },
-    { name = "terafox", colorscheme = "terafox", setup = function()
+    { name = "terafox", colorscheme = "terafox", transparent = true, setup = function()
         require("nightfox").setup({ options = { transparent = true } })
     end },
-    { name = "dracula", colorscheme = "dracula", setup = function() end },
-    -- Minimal dark themes
-    { name = "github-dark", colorscheme = "github_dark", setup = function()
+    { name = "dayfox", colorscheme = "dayfox", transparent = false, setup = function()
+        require("nightfox").setup({ options = { transparent = false } })
+    end },
+    { name = "dawnfox", colorscheme = "dawnfox", transparent = false, setup = function()
+        require("nightfox").setup({ options = { transparent = false } })
+    end },
+    { name = "dracula", colorscheme = "dracula", transparent = false, setup = function() end },
+    -- GitHub themes
+    { name = "github-dark", colorscheme = "github_dark", transparent = true, setup = function()
         require("github-theme").setup({ options = { transparent = true } })
     end },
-    { name = "github-dimmed", colorscheme = "github_dark_dimmed", setup = function()
+    { name = "github-dimmed", colorscheme = "github_dark_dimmed", transparent = true, setup = function()
         require("github-theme").setup({ options = { transparent = true } })
     end },
-    { name = "oxocarbon", colorscheme = "oxocarbon", setup = function() end },
-    { name = "nord", colorscheme = "nord", setup = function()
+    { name = "github-dark-high-contrast", colorscheme = "github_dark_high_contrast", transparent = true, setup = function()
+        require("github-theme").setup({ options = { transparent = true } })
+    end },
+    { name = "github-light", colorscheme = "github_light", transparent = false, setup = function()
+        require("github-theme").setup({ options = { transparent = false } })
+    end },
+    { name = "github-light-high-contrast", colorscheme = "github_light_high_contrast", transparent = false, setup = function()
+        require("github-theme").setup({ options = { transparent = false } })
+    end },
+    { name = "oxocarbon", colorscheme = "oxocarbon", transparent = false, setup = function() end },
+    { name = "nord", colorscheme = "nord", transparent = true, setup = function()
         vim.g.nord_disable_background = true
     end },
-    { name = "everforest", colorscheme = "everforest", setup = function()
+    { name = "everforest", colorscheme = "everforest", transparent = true, setup = function()
         vim.g.everforest_transparent_background = 1
         vim.g.everforest_background = "hard"
     end },
-    { name = "melange", colorscheme = "melange", setup = function() end },
-    { name = "material-deep-ocean", colorscheme = "material", setup = function()
+    { name = "everforest-light", colorscheme = "everforest", transparent = false, setup = function()
+        vim.o.background = "light"
+        vim.g.everforest_transparent_background = 0
+        vim.g.everforest_background = "soft"
+    end },
+    { name = "melange", colorscheme = "melange", transparent = false, setup = function()
+        vim.o.background = "dark"
+    end },
+    { name = "melange-light", colorscheme = "melange", transparent = false, setup = function()
+        vim.o.background = "light"
+    end },
+    { name = "material-deep-ocean", colorscheme = "material", transparent = true, setup = function()
         vim.g.material_style = "deep ocean"
         require("material").setup({ disable = { background = true } })
     end },
-    { name = "material-oceanic", colorscheme = "material", setup = function()
+    { name = "material-oceanic", colorscheme = "material", transparent = true, setup = function()
         vim.g.material_style = "oceanic"
         require("material").setup({ disable = { background = true } })
     end },
-    { name = "material-darker", colorscheme = "material", setup = function()
+    { name = "material-darker", colorscheme = "material", transparent = true, setup = function()
         vim.g.material_style = "darker"
         require("material").setup({ disable = { background = true } })
     end },
-    { name = "moonfly", colorscheme = "moonfly", setup = function()
+    { name = "material-lighter", colorscheme = "material", transparent = false, setup = function()
+        vim.g.material_style = "lighter"
+        require("material").setup({ disable = { background = false } })
+    end },
+    { name = "moonfly", colorscheme = "moonfly", transparent = true, setup = function()
         vim.g.moonflyTransparent = true
     end },
-    { name = "nightfly", colorscheme = "nightfly", setup = function()
+    { name = "nightfly", colorscheme = "nightfly", transparent = true, setup = function()
         vim.g.nightflyTransparent = true
     end },
-    { name = "embark", colorscheme = "embark", setup = function() end },
-    { name = "ayu-dark", colorscheme = "ayu-dark", setup = function()
+    { name = "embark", colorscheme = "embark", transparent = false, setup = function() end },
+    { name = "ayu-dark", colorscheme = "ayu-dark", transparent = true, setup = function()
         require("ayu").setup({ mirage = false, overrides = { Normal = { bg = "None" } } })
     end },
-    { name = "ayu-mirage", colorscheme = "ayu-mirage", setup = function()
+    { name = "ayu-mirage", colorscheme = "ayu-mirage", transparent = true, setup = function()
         require("ayu").setup({ mirage = true, overrides = { Normal = { bg = "None" } } })
     end },
-    { name = "vscode-dark", colorscheme = "vscode", setup = function()
+    { name = "ayu-light", colorscheme = "ayu-light", transparent = false, setup = function()
+        require("ayu").setup({ mirage = false })
+    end },
+    { name = "vscode-dark", colorscheme = "vscode", transparent = true, setup = function()
         require("vscode").setup({ transparent = true, style = "dark" })
     end },
-    { name = "zenburn", colorscheme = "zenburn", setup = function() end },
-    { name = "monokai-pro", colorscheme = "monokai-pro", setup = function()
+    { name = "vscode-light", colorscheme = "vscode", transparent = false, setup = function()
+        require("vscode").setup({ transparent = false, style = "light" })
+    end },
+    { name = "zenburn", colorscheme = "zenburn", transparent = false, setup = function() end },
+    { name = "monokai-pro", colorscheme = "monokai-pro", transparent = true, setup = function()
         require("monokai-pro").setup({ transparent_background = true })
     end },
-    { name = "monokai-classic", colorscheme = "monokai-pro-classic", setup = function()
+    { name = "monokai-classic", colorscheme = "monokai-pro-classic", transparent = true, setup = function()
         require("monokai-pro").setup({ transparent_background = true, filter = "classic" })
     end },
-    { name = "sonokai", colorscheme = "sonokai", setup = function()
+    { name = "sonokai", colorscheme = "sonokai", transparent = true, setup = function()
         vim.g.sonokai_transparent_background = 1
         vim.g.sonokai_style = "default"
     end },
-    { name = "sonokai-shusia", colorscheme = "sonokai", setup = function()
+    { name = "sonokai-shusia", colorscheme = "sonokai", transparent = true, setup = function()
         vim.g.sonokai_transparent_background = 1
         vim.g.sonokai_style = "shusia"
     end },
-    { name = "sonokai-andromeda", colorscheme = "sonokai", setup = function()
+    { name = "sonokai-andromeda", colorscheme = "sonokai", transparent = true, setup = function()
         vim.g.sonokai_transparent_background = 1
         vim.g.sonokai_style = "andromeda"
     end },
-    { name = "poimandres", colorscheme = "poimandres", setup = function()
+    { name = "poimandres", colorscheme = "poimandres", transparent = true, setup = function()
         require("poimandres").setup({ disable_background = true })
     end },
-    { name = "cyberdream", colorscheme = "cyberdream", setup = function()
+    { name = "cyberdream", colorscheme = "cyberdream", transparent = true, setup = function()
         require("cyberdream").setup({ transparent = true })
     end },
-    { name = "fluoromachine", colorscheme = "fluoromachine", setup = function()
+    { name = "fluoromachine", colorscheme = "fluoromachine", transparent = true, setup = function()
         require("fluoromachine").setup({ transparent = true, glow = true })
     end },
     -- Evangelion theme
-    { name = "evangelion", colorscheme = "evangelion", setup = function() end },
+    { name = "evangelion", colorscheme = "evangelion", transparent = false, setup = function() end },
     -- Noctis themes (dark and light variants)
-    { name = "noctis", colorscheme = "noctis", setup = function()
+    { name = "noctis", colorscheme = "noctis", transparent = false, setup = function()
         require("noctis").setup({})
     end },
-    { name = "noctis-azureus", colorscheme = "noctis-azureus", setup = function()
+    { name = "noctis-azureus", colorscheme = "noctis-azureus", transparent = false, setup = function()
         require("noctis").setup({})
     end },
-    { name = "noctis-bordo", colorscheme = "noctis-bordo", setup = function()
+    { name = "noctis-bordo", colorscheme = "noctis-bordo", transparent = false, setup = function()
         require("noctis").setup({})
     end },
-    { name = "noctis-minimus", colorscheme = "noctis-minimus", setup = function()
+    { name = "noctis-minimus", colorscheme = "noctis-minimus", transparent = false, setup = function()
         require("noctis").setup({})
     end },
-    { name = "noctis-uva", colorscheme = "noctis-uva", setup = function()
+    { name = "noctis-uva", colorscheme = "noctis-uva", transparent = false, setup = function()
         require("noctis").setup({})
     end },
-    { name = "noctis-viola", colorscheme = "noctis-viola", setup = function()
+    { name = "noctis-viola", colorscheme = "noctis-viola", transparent = false, setup = function()
         require("noctis").setup({})
     end },
-    { name = "noctis-lux", colorscheme = "noctis-lux", setup = function()
+    { name = "noctis-lux", colorscheme = "noctis-lux", transparent = false, setup = function()
         require("noctis").setup({})
     end },
-    { name = "noctis-lilac", colorscheme = "noctis-lilac", setup = function()
+    { name = "noctis-lilac", colorscheme = "noctis-lilac", transparent = false, setup = function()
         require("noctis").setup({})
     end },
-    { name = "noctis-hibernus", colorscheme = "noctis-hibernus", setup = function()
+    { name = "noctis-hibernus", colorscheme = "noctis-hibernus", transparent = false, setup = function()
         require("noctis").setup({})
     end },
     -- Min Theme (minimal)
-    { name = "min-theme", colorscheme = "min-theme", setup = function()
+    { name = "min-theme", colorscheme = "min-theme", transparent = true, setup = function()
         require("min-theme").setup({ theme = "dark", transparent = true })
     end },
-    { name = "min-theme-light", colorscheme = "min-theme", setup = function()
+    { name = "min-theme-light", colorscheme = "min-theme", transparent = false, setup = function()
         require("min-theme").setup({ theme = "light", transparent = false })
-    end },
-    -- GitHub additional variants
-    { name = "github-dark-high-contrast", colorscheme = "github_dark_high_contrast", setup = function()
-        require("github-theme").setup({ options = { transparent = true } })
-    end },
-    { name = "github-light", colorscheme = "github_light", setup = function()
-        require("github-theme").setup({ options = { transparent = false } })
-    end },
-    { name = "github-light-high-contrast", colorscheme = "github_light_high_contrast", setup = function()
-        require("github-theme").setup({ options = { transparent = false } })
     end },
 }
 
@@ -275,12 +313,14 @@ local function apply_theme(name, save)
             local cs_ok = pcall(vim.cmd, "colorscheme " .. theme.colorscheme)
 
             if cs_ok then
-                -- Apply transparency settings
-                vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
-                vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-                vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })
-                vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
-                vim.api.nvim_set_hl(0, "EndOfBuffer", { bg = "none" })
+                -- Only apply transparency overrides if theme wants it
+                if theme.transparent then
+                    vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
+                    vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+                    vim.api.nvim_set_hl(0, "NormalNC", { bg = "none" })
+                    vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
+                    vim.api.nvim_set_hl(0, "EndOfBuffer", { bg = "none" })
+                end
 
                 -- Force redraw all windows
                 for _, win in ipairs(vim.api.nvim_list_wins()) do
