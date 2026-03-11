@@ -46,8 +46,6 @@ version_gte() {
 detect_version_manager() {
     if command -v mise &>/dev/null; then
         echo "mise"
-    elif command -v asdf &>/dev/null; then
-        echo "asdf"
     elif command -v sdkman &>/dev/null || [[ -d "$HOME/.sdkman" ]]; then
         echo "sdkman"
     elif command -v nvm &>/dev/null || [[ -d "$HOME/.nvm" ]]; then
@@ -80,12 +78,6 @@ install_neovim() {
     case "$vm" in
         mise)
             if mise use -g neovim@latest 2>/dev/null; then
-                install_success=true
-            fi
-            ;;
-        asdf)
-            asdf plugin add neovim 2>/dev/null || true
-            if asdf install neovim latest 2>/dev/null && asdf global neovim latest 2>/dev/null; then
                 install_success=true
             fi
             ;;
@@ -154,11 +146,6 @@ install_node() {
         mise)
             mise use -g node@lts
             ;;
-        asdf)
-            asdf plugin add nodejs 2>/dev/null || true
-            asdf install nodejs latest
-            asdf global nodejs latest
-            ;;
         nvm)
             source "$HOME/.nvm/nvm.sh" 2>/dev/null || true
             nvm install --lts
@@ -206,11 +193,6 @@ install_java() {
     case "$vm" in
         mise)
             mise use -g java@21
-            ;;
-        asdf)
-            asdf plugin add java 2>/dev/null || true
-            asdf install java temurin-21.0.2+13.0.LTS
-            asdf global java temurin-21.0.2+13.0.LTS
             ;;
         sdkman)
             source "$HOME/.sdkman/bin/sdkman-init.sh" 2>/dev/null || true

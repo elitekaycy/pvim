@@ -59,7 +59,6 @@ end
 local java_base_paths = {
     "/usr/lib/jvm",
     vim.fn.expand("~/.sdkman/candidates/java"),
-    vim.fn.expand("~/.asdf/installs/java"),  -- asdf version manager
     vim.fn.expand("~/.local/share/mise/installs/java"),  -- mise version manager
     vim.fn.expand("~/.jdks"),
     "/opt/java",
