@@ -305,7 +305,7 @@ return {
             local entity = ctx.get_class_name()
 
             -- Extract entity name from current class
-            local suffixes = { "Controller", "Service", "Repository", "Mapper", "Dto", "DTO", "Test" }
+            local suffixes = { "Controller", "ServiceImpl", "ServiceImplTest", "Service", "Repository", "Mapper", "Dto", "DTO", "Test" }
             for _, suffix in ipairs(suffixes) do
                 if entity:sub(-#suffix) == suffix then
                     entity = entity:sub(1, -#suffix - 1)
@@ -326,8 +326,9 @@ return {
                 repository = base_path .. "/repository/" .. entity .. "Repository.java",
                 mapper = base_path .. "/mapper/" .. entity .. "Mapper.java",
                 service = base_path .. "/service/" .. entity .. "Service.java",
+                impl = base_path .. "/service/impl/" .. entity .. "ServiceImpl.java",
                 controller = base_path .. "/controller/" .. entity .. "Controller.java",
-                test = structure.src_test .. "/" .. structure.base_package:gsub("%.", "/") .. "/service/" .. entity .. "ServiceTest.java",
+                test = structure.src_test .. "/" .. structure.base_package:gsub("%.", "/") .. "/service/impl/" .. entity .. "ServiceImplTest.java",
             }
 
             local file_path = file_map[target]
@@ -339,7 +340,7 @@ return {
         end, {
             nargs = 1,
             complete = function()
-                return { "entity", "dto", "repository", "mapper", "service", "controller", "test" }
+                return { "entity", "dto", "repository", "mapper", "service", "impl", "controller", "test" }
             end,
             desc = "Jump to related file for current entity",
         })
@@ -359,7 +360,8 @@ return {
                 vim.keymap.set("n", "<leader>jge", ":SpringGoto entity<CR>", vim.tbl_extend("force", opts, { desc = "Spring: Goto entity" }))
                 vim.keymap.set("n", "<leader>jgd", ":SpringGoto dto<CR>", vim.tbl_extend("force", opts, { desc = "Spring: Goto dto" }))
                 vim.keymap.set("n", "<leader>jgr", ":SpringGoto repository<CR>", vim.tbl_extend("force", opts, { desc = "Spring: Goto repository" }))
-                vim.keymap.set("n", "<leader>jgs", ":SpringGoto service<CR>", vim.tbl_extend("force", opts, { desc = "Spring: Goto service" }))
+                vim.keymap.set("n", "<leader>jgs", ":SpringGoto service<CR>", vim.tbl_extend("force", opts, { desc = "Spring: Goto service interface" }))
+                vim.keymap.set("n", "<leader>jgi", ":SpringGoto impl<CR>", vim.tbl_extend("force", opts, { desc = "Spring: Goto service impl" }))
                 vim.keymap.set("n", "<leader>jgc", ":SpringGoto controller<CR>", vim.tbl_extend("force", opts, { desc = "Spring: Goto controller" }))
                 vim.keymap.set("n", "<leader>jgm", ":SpringGoto mapper<CR>", vim.tbl_extend("force", opts, { desc = "Spring: Goto mapper" }))
                 vim.keymap.set("n", "<leader>jgt", ":SpringGoto test<CR>", vim.tbl_extend("force", opts, { desc = "Spring: Goto test" }))

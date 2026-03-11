@@ -141,6 +141,7 @@ function M.check_entity_files(entity_name)
         repository = vim.fn.filereadable(base_path .. "/repository/" .. entity_name .. "Repository.java") == 1,
         mapper = vim.fn.filereadable(base_path .. "/mapper/" .. entity_name .. "Mapper.java") == 1,
         service = vim.fn.filereadable(base_path .. "/service/" .. entity_name .. "Service.java") == 1,
+        service_impl = vim.fn.filereadable(base_path .. "/service/impl/" .. entity_name .. "ServiceImpl.java") == 1,
         controller = vim.fn.filereadable(base_path .. "/controller/" .. entity_name .. "Controller.java") == 1,
     }
 end

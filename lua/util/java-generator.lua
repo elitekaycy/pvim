@@ -100,13 +100,37 @@ public interface {entity}Mapper {
 }
 ]]
 
+-- Service Interface (contract)
 templates.service = [[
 package {pkg}.service;
+
+import {pkg}.dto.{entity}Dto;
+
+import java.util.List;
+
+public interface {entity}Service {
+
+    List<{entity}Dto> findAll();
+
+    {entity}Dto findById(Long id);
+
+    {entity}Dto create({entity}Dto dto);
+
+    {entity}Dto update(Long id, {entity}Dto dto);
+
+    void delete(Long id);
+}
+]]
+
+-- Service Implementation
+templates.service_impl = [[
+package {pkg}.service.impl;
 
 import {pkg}.dto.{entity}Dto;
 import {pkg}.entity.{entity};
 import {pkg}.mapper.{entity}Mapper;
 import {pkg}.repository.{entity}Repository;
+import {pkg}.service.{entity}Service;
 import {pkg}.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -119,11 +143,12 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class {entity}Service {
+public class {entity}ServiceImpl implements {entity}Service {
 
     private final {entity}Repository {entity_var}Repository;
     private final {entity}Mapper {entity_var}Mapper;
 
+    @Override
     @Transactional(readOnly = true)
     public List<{entity}Dto> findAll() {
         log.debug("Finding all {entity}s");
@@ -132,6 +157,7 @@ public class {entity}Service {
                 .toList();
     }
 
+    @Override
     @Transactional(readOnly = true)
     public {entity}Dto findById(Long id) {
         log.debug("Finding {entity} by id: {}", id);
@@ -140,12 +166,14 @@ public class {entity}Service {
                 .orElseThrow(() -> new ResourceNotFoundException("{entity} not found: " + id));
     }
 
+    @Override
     public {entity}Dto create({entity}Dto dto) {
         log.info("Creating {entity}");
         {entity} entity = {entity_var}Mapper.toEntity(dto);
         return {entity_var}Mapper.toDto({entity_var}Repository.save(entity));
     }
 
+    @Override
     public {entity}Dto update(Long id, {entity}Dto dto) {
         log.info("Updating {entity}: {}", id);
         {entity} entity = {entity_var}Repository.findById(id)
@@ -154,6 +182,7 @@ public class {entity}Service {
         return {entity_var}Mapper.toDto({entity_var}Repository.save(entity));
     }
 
+    @Override
     public void delete(Long id) {
         log.info("Deleting {entity}: {}", id);
         if (!{entity_var}Repository.existsById(id)) {
@@ -232,12 +261,13 @@ public class ResourceNotFoundException extends RuntimeException {
 ]]
 
 templates.test_service = [[
-package {pkg}.service;
+package {pkg}.service.impl;
 
 import {pkg}.dto.{entity}Dto;
 import {pkg}.entity.{entity};
 import {pkg}.mapper.{entity}Mapper;
 import {pkg}.repository.{entity}Repository;
+import {pkg}.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -247,10 +277,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class {entity}ServiceTest {
+class {entity}ServiceImplTest {
 
     @Mock
     private {entity}Repository {entity_var}Repository;
@@ -259,39 +290,161 @@ class {entity}ServiceTest {
     private {entity}Mapper {entity_var}Mapper;
 
     @InjectMocks
-    private {entity}Service underTest;
+    private {entity}ServiceImpl underTest;
 
-    @Test
-    @DisplayName("should find all")
-    void shouldFindAll() {
-        // Given
-        {entity} entity = {entity}.builder().id(1L).build();
-        {entity}Dto dto = {entity}Dto.builder().id(1L).build();
-        when({entity_var}Repository.findAll()).thenReturn(List.of(entity));
-        when({entity_var}Mapper.toDto(entity)).thenReturn(dto);
+    private {entity} {entity_var};
+    private {entity}Dto {entity_var}Dto;
 
-        // When
-        List<{entity}Dto> result = underTest.findAll();
-
-        // Then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getId()).isEqualTo(1L);
+    @BeforeEach
+    void setUp() {
+        {entity_var} = {entity}.builder().id(1L).build();
+        {entity_var}Dto = {entity}Dto.builder().id(1L).build();
     }
 
-    @Test
-    @DisplayName("should find by id")
-    void shouldFindById() {
-        // Given
-        {entity} entity = {entity}.builder().id(1L).build();
-        {entity}Dto dto = {entity}Dto.builder().id(1L).build();
-        when({entity_var}Repository.findById(1L)).thenReturn(Optional.of(entity));
-        when({entity_var}Mapper.toDto(entity)).thenReturn(dto);
+    @Nested
+    @DisplayName("findAll")
+    class FindAll {
 
-        // When
-        {entity}Dto result = underTest.findById(1L);
+        @Test
+        @DisplayName("should return all entities")
+        void shouldReturnAllEntities() {
+            // Given
+            when({entity_var}Repository.findAll()).thenReturn(List.of({entity_var}));
+            when({entity_var}Mapper.toDto({entity_var})).thenReturn({entity_var}Dto);
 
-        // Then
-        assertThat(result.getId()).isEqualTo(1L);
+            // When
+            List<{entity}Dto> result = underTest.findAll();
+
+            // Then
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getId()).isEqualTo(1L);
+            verify({entity_var}Repository).findAll();
+        }
+
+        @Test
+        @DisplayName("should return empty list when no entities")
+        void shouldReturnEmptyList() {
+            // Given
+            when({entity_var}Repository.findAll()).thenReturn(List.of());
+
+            // When
+            List<{entity}Dto> result = underTest.findAll();
+
+            // Then
+            assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("findById")
+    class FindById {
+
+        @Test
+        @DisplayName("should return entity when found")
+        void shouldReturnEntityWhenFound() {
+            // Given
+            when({entity_var}Repository.findById(1L)).thenReturn(Optional.of({entity_var}));
+            when({entity_var}Mapper.toDto({entity_var})).thenReturn({entity_var}Dto);
+
+            // When
+            {entity}Dto result = underTest.findById(1L);
+
+            // Then
+            assertThat(result.getId()).isEqualTo(1L);
+        }
+
+        @Test
+        @DisplayName("should throw exception when not found")
+        void shouldThrowWhenNotFound() {
+            // Given
+            when({entity_var}Repository.findById(1L)).thenReturn(Optional.empty());
+
+            // When/Then
+            assertThatThrownBy(() -> underTest.findById(1L))
+                    .isInstanceOf(ResourceNotFoundException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("create")
+    class Create {
+
+        @Test
+        @DisplayName("should create entity")
+        void shouldCreateEntity() {
+            // Given
+            when({entity_var}Mapper.toEntity({entity_var}Dto)).thenReturn({entity_var});
+            when({entity_var}Repository.save({entity_var})).thenReturn({entity_var});
+            when({entity_var}Mapper.toDto({entity_var})).thenReturn({entity_var}Dto);
+
+            // When
+            {entity}Dto result = underTest.create({entity_var}Dto);
+
+            // Then
+            assertThat(result.getId()).isEqualTo(1L);
+            verify({entity_var}Repository).save(any({entity}.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("update")
+    class Update {
+
+        @Test
+        @DisplayName("should update entity when found")
+        void shouldUpdateEntityWhenFound() {
+            // Given
+            when({entity_var}Repository.findById(1L)).thenReturn(Optional.of({entity_var}));
+            when({entity_var}Repository.save({entity_var})).thenReturn({entity_var});
+            when({entity_var}Mapper.toDto({entity_var})).thenReturn({entity_var}Dto);
+
+            // When
+            {entity}Dto result = underTest.update(1L, {entity_var}Dto);
+
+            // Then
+            assertThat(result).isNotNull();
+            verify({entity_var}Mapper).updateEntity({entity_var}Dto, {entity_var});
+        }
+
+        @Test
+        @DisplayName("should throw exception when not found")
+        void shouldThrowWhenNotFound() {
+            // Given
+            when({entity_var}Repository.findById(1L)).thenReturn(Optional.empty());
+
+            // When/Then
+            assertThatThrownBy(() -> underTest.update(1L, {entity_var}Dto))
+                    .isInstanceOf(ResourceNotFoundException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("delete")
+    class Delete {
+
+        @Test
+        @DisplayName("should delete entity when exists")
+        void shouldDeleteEntityWhenExists() {
+            // Given
+            when({entity_var}Repository.existsById(1L)).thenReturn(true);
+
+            // When
+            underTest.delete(1L);
+
+            // Then
+            verify({entity_var}Repository).deleteById(1L);
+        }
+
+        @Test
+        @DisplayName("should throw exception when not exists")
+        void shouldThrowWhenNotExists() {
+            // Given
+            when({entity_var}Repository.existsById(1L)).thenReturn(false);
+
+            // When/Then
+            assertThatThrownBy(() -> underTest.delete(1L))
+                    .isInstanceOf(ResourceNotFoundException.class);
+        }
     }
 }
 ]]
@@ -360,8 +513,8 @@ function M.generate_file(entity, file_type, overwrite)
     local is_test = false
 
     if file_type == "test_service" then
-        pkg_type = "service"
-        filename = entity .. "ServiceTest"
+        pkg_type = "service/impl"
+        filename = entity .. "ServiceImplTest"
         is_test = true
     elseif file_type == "dto" then
         filename = entity .. "Dto"
@@ -371,6 +524,9 @@ function M.generate_file(entity, file_type, overwrite)
         filename = entity .. "Mapper"
     elseif file_type == "service" then
         filename = entity .. "Service"
+    elseif file_type == "service_impl" then
+        pkg_type = "service/impl"
+        filename = entity .. "ServiceImpl"
     elseif file_type == "controller" then
         filename = entity .. "Controller"
     end
@@ -423,7 +579,7 @@ function M.generate_module(entity, options)
         skip_set[s] = true
     end
 
-    local file_types = { "entity", "dto", "repository", "mapper", "service", "controller" }
+    local file_types = { "entity", "dto", "repository", "mapper", "service", "service_impl", "controller" }
     if include_tests then
         table.insert(file_types, "test_service")
     end
@@ -516,7 +672,7 @@ end
 ---@param entity string
 function M.generate_basic(entity)
     return M.generate_module(entity, {
-        skip = { "mapper", "service", "controller", "test_service" },
+        skip = { "mapper", "service", "service_impl", "controller", "test_service" },
     })
 end
 

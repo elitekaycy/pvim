@@ -43,10 +43,10 @@ function M.entity_name()
         return "Entity"
     end
 
-    -- Remove common suffixes
+    -- Remove common suffixes (order matters - longer suffixes first)
     local suffixes = {
         "Controller", "RestController",
-        "ServiceImpl", "Service",
+        "ServiceImplTest", "ServiceImpl", "Service",
         "RepositoryImpl", "Repository",
         "MapperImpl", "Mapper",
         "DTO", "Dto", "Request", "Response",
