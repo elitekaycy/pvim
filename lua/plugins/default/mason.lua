@@ -34,11 +34,13 @@ return {
                 "clangd",
                 -- Java (installed by mason, but configured by nvim-jdtls directly)
                 "jdtls",
+                -- Kotlin (configured manually in lua/plugins/lsp/servers/kotlin.lua)
+                "kotlin_language_server",
             },
             automatic_installation = true,
-            -- Exclude jdtls from automatic enable - we use nvim-jdtls plugin directly
+            -- Exclude servers we configure manually
             automatic_enable = {
-                exclude = { "jdtls" },
+                exclude = { "jdtls", "kotlin_language_server" },
             },
         })
 
@@ -59,6 +61,7 @@ return {
                 ensure_installed = {
                     "java-debug-adapter",
                     "java-test",
+                    "kotlin-debug-adapter",
                     "codelldb",
                 },
                 automatic_installation = true,

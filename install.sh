@@ -396,7 +396,7 @@ EOF
 setup_mason() {
     log_info "Installing LSP servers via Mason..."
 
-    NVIM_APPNAME=pvim nvim --headless "+MasonInstall lua-language-server typescript-language-server tailwindcss-language-server css-lsp html-lsp jdtls clangd prettier stylua" +qa 2>/dev/null || true
+    NVIM_APPNAME=pvim nvim --headless "+MasonInstall lua-language-server typescript-language-server tailwindcss-language-server css-lsp html-lsp jdtls kotlin-language-server kotlin-debug-adapter clangd prettier stylua" +qa 2>/dev/null || true
 
     log_success "Mason setup complete"
 }
