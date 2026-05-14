@@ -88,7 +88,11 @@ local function get_java_se_name(version)
     return "JavaSE-" .. version
 end
 
--- Find the best Java 17+ for running JDTLS itself
+-- Find the best Java for running JDTLS itself.
+-- JDTLS requires Java 17+ but is NOT compatible with Java 25+ (current JDTLS ships against 17/21 LTS).
+-- Picking Java 25 causes "client jdtls quit with exit code 13" on startup.
+local JDTLS_MIN_JAVA = 17
+local JDTLS_MAX_JAVA = 21
 local function find_jdtls_java()
     local best_java = nil
     local best_version = 0
@@ -101,8 +105,8 @@ local function find_jdtls_java()
                 local java_bin = java_home .. "/bin/java"
                 if vim.fn.executable(java_bin) == 1 then
                     local version = parse_java_version(dir)
-                    -- JDTLS requires Java 17+, prefer the newest available
-                    if version and version >= 17 and version > best_version then
+                    -- Prefer newest LTS in [17, 21] range (JDTLS-compatible)
+                    if version and version >= JDTLS_MIN_JAVA and version <= JDTLS_MAX_JAVA and version > best_version then
                         best_version = version
                         best_java = java_bin
                     end
@@ -191,24 +195,50 @@ local function get_debug_bundles()
     return bundles
 end
 
+-- Module-level caches: computed once, reused across every Java file open
+local cached_paths = nil
+local cached_jdtls_java = nil
+local cached_runtimes = nil
+local cached_debug_bundles = nil
+local missing_jdtls_notified = false
+
+local function ensure_caches()
+    if cached_paths == nil then
+        cached_paths = get_jdtls_paths() or false
+    end
+    if cached_jdtls_java == nil then
+        cached_jdtls_java = find_jdtls_java()
+    end
+    if cached_runtimes == nil then
+        cached_runtimes = detect_java_runtimes()
+    end
+    if cached_debug_bundles == nil then
+        cached_debug_bundles = get_debug_bundles()
+    end
+end
+
 local function setup_jdtls()
     -- Only start JDTLS for actual Java projects
     if not is_java_project() then
         return
     end
 
-    -- Get JDTLS paths (deferred to ensure mason has installed packages)
-    local paths = get_jdtls_paths()
-    if not paths then
-        vim.notify("JDTLS not installed. Run :MasonInstall jdtls", vim.log.levels.WARN)
+    ensure_caches()
+
+    if not cached_paths then
+        if not missing_jdtls_notified then
+            missing_jdtls_notified = true
+            vim.notify("JDTLS not installed. Run :MasonInstall jdtls", vim.log.levels.WARN)
+        end
         return
     end
 
+    local paths = cached_paths
     local jdtls = require("jdtls")
-    local jdtls_java = find_jdtls_java()
+    local jdtls_java = cached_jdtls_java
     local workspace_dir = get_workspace_dir()
-    local detected_runtimes = detect_java_runtimes()
-    local debug_bundles = get_debug_bundles()
+    local detected_runtimes = cached_runtimes
+    local debug_bundles = cached_debug_bundles
 
     local config = {
         cmd = {
@@ -217,9 +247,10 @@ local function setup_jdtls()
             "-Dosgi.bundles.defaultStartLevel=4",
             "-Declipse.product=org.eclipse.jdt.ls.core.product",
             "-Dlog.protocol=true",
-            "-Dlog.level=ALL",
+            "-Dlog.level=WARN",
             "-javaagent:" .. paths.lombok_jar,
-            "-Xms1g",
+            "-Xms512m",
+            "-Xmx2g",
             "--add-modules=ALL-SYSTEM",
             "--add-opens=java.base/java.util=ALL-UNNAMED",
             "--add-opens=java.base/java.lang=ALL-UNNAMED",
@@ -234,9 +265,8 @@ local function setup_jdtls()
         -- Only look for actual Java project markers, NOT .git
         root_dir = jdtls.setup.find_root(java_project_markers),
         on_attach = function(client, bufnr)
-            -- Setup DAP (Debug Adapter Protocol)
+            -- Setup DAP (Debug Adapter Protocol) - defer main class scan to avoid blocking startup
             require("jdtls").setup_dap({ hotcodereplace = "auto" })
-            require("jdtls.dap").setup_dap_main_class_configs()
 
             -- Setup CodeLens (Run/Debug buttons, reference counts)
             codelens.on_attach(client, bufnr)
@@ -358,7 +388,7 @@ local function setup_jdtls()
         settings = {
             java = {
                 eclipse = {
-                    downloadSources = true,
+                    downloadSources = false,
                 },
                 configuration = {
                     updateBuildConfiguration = "interactive",
@@ -387,7 +417,11 @@ local function setup_jdtls()
         },
     }
 
-    jdtls.start_or_attach(config)
+    -- Defer the actual start_or_attach so the UI thread is not blocked by JVM spawn / IPC handshake.
+    -- vim.schedule lets the current file-open finish rendering before we touch LSP.
+    vim.schedule(function()
+        jdtls.start_or_attach(config)
+    end)
 end
 
 vim.api.nvim_create_augroup("JavaLSPGroup", { clear = true })
@@ -399,3 +433,8 @@ vim.api.nvim_create_autocmd("FileType", {
         setup_jdtls()
     end,
 })
+
+-- Warm caches after Neovim is idle so the first Java file open doesn't pay the detection cost.
+vim.defer_fn(function()
+    pcall(ensure_caches)
+end, 2000)
