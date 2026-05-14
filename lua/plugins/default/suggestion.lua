@@ -4,6 +4,7 @@
 return {
     dir = vim.fn.stdpath("config") .. "/lua/suggestion",
     name = "pvim-suggestion",
+    enabled = false,
     dependencies = {
         "pvim-indexer",
         "nvim-treesitter/nvim-treesitter",
