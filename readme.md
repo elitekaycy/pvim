@@ -228,7 +228,9 @@ This will:
 git clone https://github.com/elitekaycy/pvim.git ~/.config/pvim
 ```
 
-#### 3. Ensure `pvim` is on your PATH
+#### 3. Ensure the `pvim` launcher works
+
+`pvim` is expected to be a real executable on your PATH, not just a shell alias.
 
 Make sure `~/.local/bin` is on your PATH:
 
@@ -236,9 +238,29 @@ Make sure `~/.local/bin` is on your PATH:
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-The installer also creates a real launcher at `~/.local/bin/pvim`, so `pvim .` works even without aliases.
+The installer creates this launcher:
 
-If you still want aliases, add to your `~/.zshrc` or `~/.bashrc`:
+```bash
+~/.local/bin/pvim
+```
+
+Its job is simple:
+
+```bash
+#!/usr/bin/env bash
+export NVIM_APPNAME=pvim
+exec nvim "$@"
+```
+
+That is why these all work:
+
+```bash
+pvim
+pvim .
+pvim path/to/file.ts
+```
+
+Optional aliases if you want shorter typing:
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
@@ -252,33 +274,48 @@ Reload your shell:
 source ~/.zshrc  # or source ~/.bashrc
 ```
 
+Verify the launcher before debugging anything else:
+
+```bash
+which pvim
+pvim --headless '+lua print(vim.fn.stdpath("config"))' +qa!
+```
+
+Expected config path:
+
+```text
+/home/your-user/.config/pvim
+```
+
+If `pvim .` opens your normal Neovim config instead of pvim, your shell is not finding the launcher first. Fix your PATH before doing anything else.
+
 #### 4. Launch pvim
 
 ```bash
 pvim
 ```
 
-You can verify that it resolves correctly with:
+Plugins auto-install on first launch. Run `:Mason` to install language servers.
 
-```bash
-which pvim
-```
+#### 5. Use the built-in searchable key reference
 
-Inside pvim, use the searchable quick reference:
+Inside pvim:
 
 ```vim
 :PvimSource
 ```
 
-Examples:
+You can filter immediately:
 
 ```vim
 :PvimSource git
 :PvimSource test
 :PvimSource leader
+:PvimSource harpoon
+:PvimSource diagnostics
 ```
 
-Aliases:
+Command aliases:
 
 ```vim
 :PvimKeys
@@ -286,7 +323,35 @@ Aliases:
 :pvimkeys
 ```
 
-Plugins will auto-install on first launch. Run `:Mason` to install language servers.
+This opens the README in a tab and starts a fuzzy search so you can quickly find key combinations without leaving Neovim.
+
+#### 6. If you use broot
+
+If you want pressing `Enter` on a file in broot to open that file in `pvim` in the same shell session, two things must be true:
+
+1. broot must use a parent-shell command (`from_shell = true`)
+2. you must launch broot through `br` (or alias `broot` to `br`)
+
+Example broot verb:
+
+```toml
+[[verbs]]
+invocation = "edit"
+key = "enter"
+apply_to = "file"
+external = 'exec pvim "{file}"'
+from_shell = true
+leave_broot = true
+```
+
+Recommended shell setup:
+
+```bash
+source ~/.config/broot/launcher/bash/br
+alias broot='br'
+```
+
+If you run the raw `broot` binary directly, it cannot replace the current shell process, so same-shell `exec pvim ...` behavior will not happen.
 
 ## Supported Languages
 
