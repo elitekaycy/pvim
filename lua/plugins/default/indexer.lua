@@ -3,6 +3,7 @@
 return {
     dir = vim.fn.stdpath("config") .. "/lua/indexer",
     name = "pvim-indexer",
+    enabled = false,
     dependencies = {
         "kkharji/sqlite.lua",
         "nvim-treesitter/nvim-treesitter",

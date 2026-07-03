@@ -1,5 +1,6 @@
 return {
 	"hrsh7th/nvim-cmp",
+	event = "InsertEnter",
 	dependencies = {
 		"hrsh7th/cmp-nvim-lsp",
 		"hrsh7th/cmp-buffer",
@@ -14,18 +15,17 @@ return {
 		local luasnip = require("luasnip")
 		local cmp_autopairs = require("nvim-autopairs.completion.cmp")
 
+		luasnip.config.set_config({
+			history = true,
+			updateevents = "TextChanged,TextChangedI",
+		})
+
 		-- Load friendly-snippets
 		require("luasnip.loaders.from_vscode").lazy_load()
 		-- Load custom pvim snippets (Spring Boot, etc.) - JSON format
 		require("luasnip.loaders.from_vscode").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets" } })
 		-- Load dynamic Lua snippets (context-aware)
 		require("luasnip.loaders.from_lua").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets/luasnippets" } })
-
-		-- Register project indexer cmp source
-		local ok, cmp_source = pcall(require, "indexer.cmp_source")
-		if ok then
-			cmp_source.register()
-		end
 
 		cmp.setup({
 			snippet = {
@@ -63,7 +63,6 @@ return {
 			}),
 			sources = {
 				{ name = "nvim_lsp" },
-				{ name = "project_index" }, -- Project-aware suggestions
 				{ name = "buffer" },
 				{ name = "path" },
 				{ name = "luasnip" },
@@ -73,7 +72,6 @@ return {
 				format = function(entry, vim_item)
 					vim_item.menu = ({
 						nvim_lsp = "[LSP]",
-						project_index = "[Index]",
 						buffer = "[Buffer]",
 						path = "[Path]",
 						luasnip = "[Snip]",

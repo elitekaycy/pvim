@@ -84,8 +84,11 @@ function M.setup_codelens()
         { noremap = true, silent = true, desc = 'Run CodeLens action' })
 end
 
+local codelens_initialized = false
+
 function M.on_attach(client, bufnr)
-    if client.supports_method('textDocument/codeLens') then
+    if client.supports_method('textDocument/codeLens') and not codelens_initialized then
+        codelens_initialized = true
         M.setup_codelens()
     end
 end

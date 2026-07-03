@@ -1,10 +1,11 @@
 return {
     "ahmedkhalf/project.nvim",
+    enabled = false,
     lazy = true,
     event = "VeryLazy",
     config = function()
         require("project_nvim").setup({
-            detection_methods = { "pattern", "lsp" },
+            detection_methods = { "pattern" },
             patterns = {
                 ".git",
                 "Makefile",

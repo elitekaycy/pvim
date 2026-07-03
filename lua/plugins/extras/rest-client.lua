@@ -20,6 +20,8 @@ return {
         default_view = "body",
         -- Environment file name
         environment_scope = "b",  -- buffer local
+        -- Default environment from http-client.env.json
+        default_env = "local",
     },
     config = function(_, opts)
         local kulala = require("kulala")

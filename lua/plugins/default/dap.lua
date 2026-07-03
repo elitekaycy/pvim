@@ -1,12 +1,40 @@
 return {
     'mfussenegger/nvim-dap',
+    keys = {
+        { "<F5>", function() require("dap").continue() end, desc = "Debug: Continue" },
+        { "<F10>", function() require("dap").step_over() end, desc = "Debug: Step Over" },
+        { "<F11>", function() require("dap").step_into() end, desc = "Debug: Step Into" },
+        { "<F12>", function() require("dap").step_out() end, desc = "Debug: Step Out" },
+        { "<leader>b", function() require("dap").toggle_breakpoint() end, desc = "Debug: Toggle Breakpoint" },
+        {
+            "<leader>B",
+            function() require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: ")) end,
+            desc = "Debug: Conditional Breakpoint"
+        },
+        { "<leader>dc", function() require("dap").continue() end, desc = "Debug: Continue" },
+        { "<leader>di", function() require("dap").step_into() end, desc = "Debug: Step Into" },
+        { "<leader>do", function() require("dap").step_over() end, desc = "Debug: Step Over" },
+        { "<leader>dO", function() require("dap").step_out() end, desc = "Debug: Step Out" },
+        { "<leader>dq", function() require("dap").terminate() end, desc = "Debug: Terminate" },
+        { "<leader>dr", function() require("dap").restart() end, desc = "Debug: Restart" },
+        { "<leader>dp", function() require("dap").pause() end, desc = "Debug: Pause" },
+        { "<leader>du", function() require("dapui").toggle() end, desc = "Debug: Toggle UI" },
+        { "<leader>de", function() require("dapui").eval() end, mode = "n", desc = "Debug: Evaluate" },
+        { "<leader>de", function() require("dapui").eval() end, mode = "v", desc = "Debug: Evaluate Selection" },
+        {
+            "<leader>dB",
+            function() require("dap").set_breakpoint(nil, nil, vim.fn.input("Log point message: ")) end,
+            desc = "Debug: Log Point"
+        },
+        { "<leader>dl", function() require("dap").run_last() end, desc = "Debug: Run Last" },
+        { "<leader>dC", function() require("dap").clear_breakpoints() end, desc = "Debug: Clear Breakpoints" },
+    },
     dependencies = {
         'nvim-neotest/nvim-nio',
         'rcarriga/nvim-dap-ui',
         'theHamsta/nvim-dap-virtual-text',
         'williamboman/mason.nvim',
-        'leoluz/nvim-dap-go',
-        'mfussenegger/nvim-dap-python' },
+    },
     config = function()
         local lsp_debuggers_dir = vim.fn.stdpath("config") .. "/lua/plugins/lsp/debuggers"
         for _, file in ipairs(vim.fn.readdir(lsp_debuggers_dir)) do

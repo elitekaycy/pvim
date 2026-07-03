@@ -24,7 +24,9 @@ end
 
 require("core.settings")
 require("core.keymaps")
+require("core.commands").setup()
 require("core.lazy")
 require("core.autocommand").setup()
+require("plugins.lsp.prewarm").setup()
 
 require("keybinding")
