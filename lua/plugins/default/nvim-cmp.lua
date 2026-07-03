@@ -1,5 +1,6 @@
 return {
 	"hrsh7th/nvim-cmp",
+	event = "InsertEnter",
 	dependencies = {
 		"hrsh7th/cmp-nvim-lsp",
 		"hrsh7th/cmp-buffer",
@@ -13,6 +14,11 @@ return {
 		local cmp = require("cmp")
 		local luasnip = require("luasnip")
 		local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+
+		luasnip.config.set_config({
+			history = true,
+			updateevents = "TextChanged,TextChangedI",
+		})
 
 		-- Load friendly-snippets
 		require("luasnip.loaders.from_vscode").lazy_load()

@@ -2,7 +2,7 @@
 -- Auto-save and restore sessions per directory
 return {
     "folke/persistence.nvim",
-    event = "BufReadPre",
+    event = "VeryLazy",
     opts = {
         dir = vim.fn.stdpath("state") .. "/sessions/",
         options = { "buffers", "curdir", "tabpages", "winsize", "help", "globals", "skiprtp" },
@@ -20,7 +20,10 @@ return {
             group = vim.api.nvim_create_augroup("restore_session", { clear = true }),
             callback = function()
                 if vim.fn.argc() == 0 and not vim.g.started_with_stdin then
-                    require("persistence").load()
+                    vim.schedule(function()
+                        require("lazy").load({ plugins = { "persistence.nvim" } })
+                        require("persistence").load()
+                    end)
                 end
             end,
             nested = true,

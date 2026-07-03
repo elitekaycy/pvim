@@ -1,3 +1,4 @@
+local M = {}
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local codelens = require("utils.codelens")
 
@@ -37,22 +38,139 @@ local function get_jdtls_paths()
     return nil
 end
 
--- Use full path hash to avoid workspace collisions between projects with same folder name
-local function get_workspace_dir()
-    local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p"):gsub("/", "_"):gsub(":", "_")
-    return vim.fn.stdpath("data") .. "/jdtls/workspace/" .. project_name
+-- Use detected project root, not cwd, for workspace identity so the same project
+-- reuses a single JDTLS cache even when Neovim is launched from different folders.
+local function get_hashed_workspace_dir(root_dir)
+    local normalized_root = vim.fs.normalize(root_dir)
+    local project_name = vim.fs.basename(normalized_root)
+    local project_hash = vim.fn.sha256(normalized_root):sub(1, 12)
+    return string.format("%s/jdtls/workspace/%s-%s", vim.fn.stdpath("data"), project_name, project_hash)
 end
 
--- Java project markers for root detection (includes .git for monorepos, but is_java_project() guards startup)
-local java_project_markers = { "pom.xml", "build.gradle", "build.gradle.kts", "mvnw", "gradlew", ".mvn", "settings.gradle", "settings.gradle.kts", ".git" }
+local function get_legacy_workspace_dir(root_dir)
+    local legacy_name = vim.fs.normalize(root_dir):gsub("/", "_"):gsub(":", "_")
+    return vim.fn.stdpath("data") .. "/jdtls/workspace/" .. legacy_name
+end
+
+local function has_jdtls_metadata(dir)
+    return vim.fn.filereadable(dir .. "/.metadata/.log") == 1
+end
+
+local function get_workspace_dir(root_dir)
+    local hashed_dir = get_hashed_workspace_dir(root_dir)
+    local legacy_dir = get_legacy_workspace_dir(root_dir)
+
+    if has_jdtls_metadata(hashed_dir) then
+        return hashed_dir
+    end
+
+    if has_jdtls_metadata(legacy_dir) then
+        return legacy_dir
+    end
+
+    return hashed_dir
+end
+
+local function get_workspace_log_path(workspace_dir)
+    return workspace_dir .. "/.metadata/.log"
+end
+
+local function has_broken_workspace_index(workspace_dir)
+    local log_path = get_workspace_log_path(workspace_dir)
+    if vim.fn.filereadable(log_path) == 0 then
+        return false
+    end
+
+    local ok, lines = pcall(vim.fn.readfile, log_path)
+    if not ok or not lines or #lines == 0 then
+        return false
+    end
+
+    local start = math.max(1, #lines - 400)
+    for i = start, #lines do
+        local line = lines[i]
+        if line:find("Java Index broken", 1, true)
+            or line:find("Failed to save JDT index", 1, true)
+            or line:find("OutOfMemoryError: Java heap space", 1, true) then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function repair_workspace_index_if_needed(workspace_dir)
+    local marker = workspace_dir .. "/.metadata/.pvim-jdt-index-repaired"
+    if vim.fn.filereadable(marker) == 1 then
+        return
+    end
+
+    if not has_broken_workspace_index(workspace_dir) then
+        return
+    end
+
+    local index_dir = workspace_dir .. "/.metadata/.plugins/org.eclipse.jdt.core"
+    if vim.fn.isdirectory(index_dir) == 0 then
+        return
+    end
+
+    local cache_files = {
+        "*.index",
+        "assumedExternalFilesCache",
+        "externalFilesCache",
+        "externalLibsTimeStamps",
+        "indexNamesMap.txt",
+        "javaLikeNames.txt",
+        "nonChainingJarsCache",
+        "savedIndexNames.txt",
+        "variablesAndContainers.dat",
+    }
+
+    for _, pattern in ipairs(cache_files) do
+        local matches = vim.fn.glob(index_dir .. "/" .. pattern, false, true)
+        for _, path in ipairs(matches) do
+            pcall(vim.fn.delete, path)
+        end
+    end
+
+    pcall(vim.fn.writefile, { os.date("!%Y-%m-%dT%H:%M:%SZ") }, marker)
+    vim.schedule(function()
+        vim.notify("Repaired broken JDTLS workspace index cache for faster future reloads", vim.log.levels.INFO)
+    end)
+end
+
+local function get_shared_index_dir()
+    local index_dir = vim.fs.normalize(vim.fn.expand("~/.cache/.jdt/index"))
+    vim.fn.mkdir(index_dir, "p")
+    return index_dir
+end
 
 -- Strict markers for is_java_project() check (no .git - we only start JDTLS for actual Java projects)
 local java_strict_markers = { "pom.xml", "build.gradle", "build.gradle.kts", "mvnw", "gradlew", ".mvn", "settings.gradle", "settings.gradle.kts" }
 
--- Check if current directory is a Java project (uses strict markers, no .git)
-local function is_java_project()
-    local root = vim.fs.find(java_strict_markers, { upward = true, path = vim.fn.expand("%:p:h") })[1]
-    return root ~= nil
+local function find_java_root(startpath)
+    local path = startpath or vim.api.nvim_buf_get_name(0)
+    if path == "" then
+        path = vim.fn.getcwd()
+    end
+
+    local search_from = vim.fs.dirname(path) or path
+    local strict_root = vim.fs.find(java_strict_markers, { upward = true, path = search_from })[1]
+    if strict_root then
+        return vim.fs.dirname(strict_root)
+    end
+
+    local git_root = vim.fs.find({ ".git" }, { upward = true, path = search_from })[1]
+    if git_root then
+        local root_dir = vim.fs.dirname(git_root)
+        if vim.fn.isdirectory(root_dir .. "/src/main/java") == 1
+            or vim.fn.isdirectory(root_dir .. "/src/test/java") == 1
+            or vim.fn.isdirectory(root_dir .. "/src") == 1 then
+            return root_dir
+        end
+    end
+
+    return nil
 end
 
 -- Common Java installation paths on Linux
@@ -132,8 +250,36 @@ end
 
 -- Detect all installed Java runtimes for project compilation
 local function detect_java_runtimes()
-    local runtimes = {}
+    local runtimes_by_name = {}
     local seen_paths = {}
+    local preferred_versions = {
+        [8] = true,
+        [11] = true,
+        [17] = true,
+        [21] = true,
+        [23] = true,
+    }
+
+    local function maybe_add_runtime(java_home, version, is_default)
+        if not version or not preferred_versions[version] then
+            return
+        end
+
+        local name = get_java_se_name(version)
+        local existing = runtimes_by_name[name]
+        local runtime = {
+            name = name,
+            path = java_home,
+        }
+
+        if is_default then
+            runtime.default = true
+        end
+
+        if not existing or (is_default and not existing.default) then
+            runtimes_by_name[name] = runtime
+        end
+    end
 
     for _, base_path in ipairs(java_base_paths) do
         if vim.fn.isdirectory(base_path) == 1 then
@@ -145,13 +291,7 @@ local function detect_java_runtimes()
                 if vim.fn.executable(java_bin) == 1 and not seen_paths[java_home] then
                     seen_paths[java_home] = true
                     local version = parse_java_version(dir)
-
-                    if version then
-                        table.insert(runtimes, {
-                            name = get_java_se_name(version),
-                            path = java_home,
-                        })
-                    end
+                    maybe_add_runtime(java_home, version, false)
                 end
             end
         end
@@ -161,11 +301,15 @@ local function detect_java_runtimes()
     local java_home = os.getenv("JAVA_HOME")
     if java_home and vim.fn.isdirectory(java_home) == 1 and not seen_paths[java_home] then
         local version = parse_java_version(vim.fn.fnamemodify(java_home, ":t"))
-        table.insert(runtimes, {
-            name = version and get_java_se_name(version) or "JavaSE-current",
-            path = java_home,
-            default = true,
-        })
+        maybe_add_runtime(java_home, version, true)
+    end
+
+    local runtimes = {}
+    for _, version in ipairs({ 8, 11, 17, 21, 23 }) do
+        local name = get_java_se_name(version)
+        if runtimes_by_name[name] then
+            table.insert(runtimes, runtimes_by_name[name])
+        end
     end
 
     return runtimes
@@ -201,6 +345,8 @@ local cached_jdtls_java = nil
 local cached_runtimes = nil
 local cached_debug_bundles = nil
 local missing_jdtls_notified = false
+local dap_initialized_roots = {}
+local debug_enabled_roots = {}
 
 local function ensure_caches()
     if cached_paths == nil then
@@ -217,9 +363,93 @@ local function ensure_caches()
     end
 end
 
-local function setup_jdtls()
-    -- Only start JDTLS for actual Java projects
-    if not is_java_project() then
+local function ensure_debug_bundles()
+    if cached_debug_bundles == nil then
+        cached_debug_bundles = get_debug_bundles()
+    end
+    return cached_debug_bundles
+end
+
+local function ensure_jdtls_dap(root_dir)
+    if dap_initialized_roots[root_dir] then
+        return
+    end
+
+    local ok, jdtls = pcall(require, "jdtls")
+    if not ok then
+        pcall(function()
+            require("lazy").load({ plugins = { "nvim-jdtls" } })
+        end)
+        ok, jdtls = pcall(require, "jdtls")
+    end
+    if not ok then
+        return
+    end
+
+    jdtls.setup_dap({ hotcodereplace = "auto" })
+    dap_initialized_roots[root_dir] = true
+end
+
+local function client_has_debug_bundles(root_dir)
+    for _, client in ipairs(vim.lsp.get_clients({ name = "jdtls" })) do
+        if client.config and client.config.root_dir == root_dir then
+            local bundles = client.config.init_options and client.config.init_options.bundles or {}
+            return type(bundles) == "table" and #bundles > 0
+        end
+    end
+
+    return false
+end
+
+local function restart_jdtls_with_debug(root_dir, startpath)
+    debug_enabled_roots[root_dir] = true
+    dap_initialized_roots[root_dir] = nil
+
+    for _, client in ipairs(vim.lsp.get_clients({ name = "jdtls" })) do
+        if client.config and client.config.root_dir == root_dir then
+            client:stop(true)
+        end
+    end
+
+    vim.defer_fn(function()
+        setup_jdtls(startpath)
+    end, 150)
+end
+
+local function ensure_debug_ready(root_dir, startpath, feature_name)
+    if client_has_debug_bundles(root_dir) then
+        return true
+    end
+
+    restart_jdtls_with_debug(root_dir, startpath)
+    vim.notify(
+        string.format("Restarting JDTLS with debug/test bundles for %s. Run %s again in a moment.", root_dir, feature_name),
+        vim.log.levels.INFO
+    )
+    return false
+end
+
+local function get_jdtls_module()
+    local ok, jdtls = pcall(require, "jdtls")
+    if ok then
+        return jdtls
+    end
+
+    pcall(function()
+        require("lazy").load({ plugins = { "nvim-jdtls" } })
+    end)
+
+    ok, jdtls = pcall(require, "jdtls")
+    if ok then
+        return jdtls
+    end
+
+    return nil
+end
+
+local function setup_jdtls(startpath)
+    local root_dir = find_java_root(startpath)
+    if not root_dir then
         return
     end
 
@@ -234,11 +464,14 @@ local function setup_jdtls()
     end
 
     local paths = cached_paths
-    local jdtls = require("jdtls")
+    local jdtls = get_jdtls_module()
+    if not jdtls then
+        return
+    end
     local jdtls_java = cached_jdtls_java
-    local workspace_dir = get_workspace_dir()
+    local workspace_dir = get_workspace_dir(root_dir)
+    repair_workspace_index_if_needed(workspace_dir)
     local detected_runtimes = cached_runtimes
-    local debug_bundles = cached_debug_bundles
 
     local config = {
         cmd = {
@@ -248,9 +481,14 @@ local function setup_jdtls()
             "-Declipse.product=org.eclipse.jdt.ls.core.product",
             "-Dlog.protocol=true",
             "-Dlog.level=WARN",
+            "-XX:+UseParallelGC",
+            "-XX:GCTimeRatio=4",
+            "-XX:AdaptiveSizePolicyWeight=90",
+            "-Dsun.zip.disableMemoryMapping=true",
+            "-Xlog:disable",
             "-javaagent:" .. paths.lombok_jar,
-            "-Xms512m",
-            "-Xmx2g",
+            "-Xms100m",
+            "-Xmx4g",
             "--add-modules=ALL-SYSTEM",
             "--add-opens=java.base/java.util=ALL-UNNAMED",
             "--add-opens=java.base/java.lang=ALL-UNNAMED",
@@ -262,12 +500,8 @@ local function setup_jdtls()
             workspace_dir,
         },
         capabilities = capabilities,
-        -- Only look for actual Java project markers, NOT .git
-        root_dir = jdtls.setup.find_root(java_project_markers),
+        root_dir = root_dir,
         on_attach = function(client, bufnr)
-            -- Setup DAP (Debug Adapter Protocol) - defer main class scan to avoid blocking startup
-            require("jdtls").setup_dap({ hotcodereplace = "auto" })
-
             -- Setup CodeLens (Run/Debug buttons, reference counts)
             codelens.on_attach(client, bufnr)
 
@@ -342,18 +576,46 @@ local function setup_jdtls()
             vim.keymap.set("n", "<leader>ji", function() require("jdtls").compile("incremental") end, vim.tbl_extend("force", opts, { desc = "Compile (Incremental)" }))
 
             -- Java Testing (JUnit)
-            vim.keymap.set("n", "<leader>jt", require("jdtls").test_nearest_method, vim.tbl_extend("force", opts, { desc = "Test Nearest Method" }))
-            vim.keymap.set("n", "<leader>jT", require("jdtls").test_class, vim.tbl_extend("force", opts, { desc = "Test Class" }))
-            vim.keymap.set("n", "<leader>jp", require("jdtls").pick_test, vim.tbl_extend("force", opts, { desc = "Pick Test" }))
+            vim.keymap.set("n", "<leader>jt", function()
+                local startpath = vim.api.nvim_buf_get_name(bufnr)
+                if not ensure_debug_ready(root_dir, startpath, "<leader>jt") then
+                    return
+                end
+                require("jdtls").test_nearest_method()
+            end, vim.tbl_extend("force", opts, { desc = "Test Nearest Method" }))
+            vim.keymap.set("n", "<leader>jT", function()
+                local startpath = vim.api.nvim_buf_get_name(bufnr)
+                if not ensure_debug_ready(root_dir, startpath, "<leader>jT") then
+                    return
+                end
+                require("jdtls").test_class()
+            end, vim.tbl_extend("force", opts, { desc = "Test Class" }))
+            vim.keymap.set("n", "<leader>jp", function()
+                local startpath = vim.api.nvim_buf_get_name(bufnr)
+                if not ensure_debug_ready(root_dir, startpath, "<leader>jp") then
+                    return
+                end
+                require("jdtls").pick_test()
+            end, vim.tbl_extend("force", opts, { desc = "Pick Test" }))
 
             -- Java Debug
             vim.keymap.set("n", "<leader>jd", function()
+                local startpath = vim.api.nvim_buf_get_name(bufnr)
+                if not ensure_debug_ready(root_dir, startpath, "<leader>jd") then
+                    return
+                end
+                ensure_jdtls_dap(root_dir)
                 require("jdtls.dap").setup_dap_main_class_configs()
                 require("dap").continue()
             end, vim.tbl_extend("force", opts, { desc = "Debug Java" }))
 
             -- Run main class
             vim.keymap.set("n", "<leader>jr", function()
+                local startpath = vim.api.nvim_buf_get_name(bufnr)
+                if not ensure_debug_ready(root_dir, startpath, "<leader>jr") then
+                    return
+                end
+                ensure_jdtls_dap(root_dir)
                 require("jdtls.dap").setup_dap_main_class_configs()
                 -- Try to run without debugging
                 local dap = require("dap")
@@ -387,32 +649,77 @@ local function setup_jdtls()
         end,
         settings = {
             java = {
+                autobuild = {
+                    enabled = false,
+                },
                 eclipse = {
                     downloadSources = false,
                 },
                 configuration = {
-                    updateBuildConfiguration = "interactive",
+                    detectJdksAtStart = false,
+                    updateBuildConfiguration = "disabled",
+                    workspaceCacheLimit = 180,
                     -- Register all detected Java runtimes so JDTLS knows about Java 11, 17, 21, etc.
                     runtimes = detected_runtimes,
+                },
+                import = {
+                    exclusions = {
+                        "**/node_modules/**",
+                        "**/.git/**",
+                        "**/.gradle/**",
+                        "**/build/**",
+                        "**/target/**",
+                        "**/.idea/**",
+                        "**/.settings/**",
+                        "**/.metadata/**",
+                    },
+                    maven = {
+                        enabled = true,
+                    },
                 },
                 inlayHints = {
                     parameterNames = {
                         enabled = "all",
                     },
                 },
+                implementationsCodeLens = {
+                    enabled = false,
+                },
+                referencesCodeLens = {
+                    enabled = false,
+                },
                 format = {
                     enabled = true,
+                },
+                maven = {
+                    downloadSources = false,
+                    updateSnapshots = false,
+                },
+                sharedIndexes = {
+                    enabled = "on",
+                    location = get_shared_index_dir(),
+                },
+                project = {
+                    resourceFilters = {
+                        "node_modules",
+                        ".git",
+                        ".gradle",
+                        ".idea",
+                        ".settings",
+                        "build",
+                        "target",
+                    },
                 },
                 -- Compile with project's specified Java version
                 compile = {
                     nullAnalysis = {
-                        mode = "automatic",
+                        mode = "disabled",
                     },
                 },
             },
         },
         init_options = {
-            bundles = debug_bundles,
+            bundles = debug_enabled_roots[root_dir] and ensure_debug_bundles() or {},
             extendedClientCapabilities = jdtls.extendedClientCapabilities,
         },
     }
@@ -421,6 +728,17 @@ local function setup_jdtls()
     -- vim.schedule lets the current file-open finish rendering before we touch LSP.
     vim.schedule(function()
         jdtls.start_or_attach(config)
+    end)
+end
+
+function M.prewarm(bufnr)
+    local target = bufnr or vim.api.nvim_get_current_buf()
+    if not vim.api.nvim_buf_is_valid(target) then
+        return
+    end
+
+    vim.api.nvim_buf_call(target, function()
+        setup_jdtls(vim.api.nvim_buf_get_name(target))
     end)
 end
 
@@ -438,3 +756,5 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.defer_fn(function()
     pcall(ensure_caches)
 end, 2000)
+
+return M

@@ -1,6 +1,7 @@
 -- Custom file icons for nvim-web-devicons
 return {
     "nvim-tree/nvim-web-devicons",
+    lazy = true,
     config = function()
         require("nvim-web-devicons").setup({
             override_by_extension = {

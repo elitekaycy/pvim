@@ -1,11 +1,9 @@
 return {
     "neovim/nvim-lspconfig",
+    event = { "BufReadPre", "BufNewFile" },
     -- Note: deprecation warning is expected in nvim 0.11+, lspconfig still works
     dependencies = {
         "hrsh7th/cmp-nvim-lsp",
-        "mfussenegger/nvim-jdtls",
-        'ray-x/lsp_signature.nvim',
-        'kosayoda/nvim-lightbulb',
     },
     config = function()
         local lsp_servers_dir = vim.fn.stdpath("config") .. "/lua/plugins/lsp/servers"
@@ -15,5 +13,6 @@ return {
                 require("plugins.lsp.servers." .. module_name)
             end
         end
+
     end,
 }

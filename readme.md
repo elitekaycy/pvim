@@ -228,12 +228,22 @@ This will:
 git clone https://github.com/elitekaycy/pvim.git ~/.config/pvim
 ```
 
-#### 3. Add shell alias
+#### 3. Ensure `pvim` is on your PATH
 
-Add to your `~/.zshrc` or `~/.bashrc`:
+Make sure `~/.local/bin` is on your PATH:
 
 ```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+The installer also creates a real launcher at `~/.local/bin/pvim`, so `pvim .` works even without aliases.
+
+If you still want aliases, add to your `~/.zshrc` or `~/.bashrc`:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
 alias pvim='NVIM_APPNAME=pvim nvim'
+alias pvi='NVIM_APPNAME=pvim nvim'
 ```
 
 Reload your shell:
@@ -246,6 +256,34 @@ source ~/.zshrc  # or source ~/.bashrc
 
 ```bash
 pvim
+```
+
+You can verify that it resolves correctly with:
+
+```bash
+which pvim
+```
+
+Inside pvim, use the searchable quick reference:
+
+```vim
+:PvimSource
+```
+
+Examples:
+
+```vim
+:PvimSource git
+:PvimSource test
+:PvimSource leader
+```
+
+Aliases:
+
+```vim
+:PvimKeys
+:pvimsource
+:pvimkeys
 ```
 
 Plugins will auto-install on first launch. Run `:Mason` to install language servers.

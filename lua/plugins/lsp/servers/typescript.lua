@@ -2,10 +2,26 @@ local lspconfig = require("lspconfig")
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local codelens = require("utils.codelens")
 
+local function get_tsserver_cmd()
+    local mason_bin = vim.fn.stdpath("data") .. "/mason/bin/typescript-language-server"
+    if vim.fn.executable(mason_bin) == 1 then
+        return { mason_bin, "--stdio" }
+    end
+    if vim.fn.executable("typescript-language-server") == 1 then
+        return { "typescript-language-server", "--stdio" }
+    end
+    return nil
+end
+
+local tsserver_cmd = get_tsserver_cmd()
+if not tsserver_cmd then
+    return
+end
+
 lspconfig.ts_ls.setup({
     capabilities = capabilities,
     filetypes = { "typescript", "typescriptreact", "typescript.tsx", "javascript", "javascriptreact", "javascript.jsx" },
-    cmd = { "typescript-language-server", "--stdio" },
+    cmd = tsserver_cmd,
     root_dir = lspconfig.util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", "angular.json", ".git"),
     settings = {
         typescript = {

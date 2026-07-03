@@ -6,7 +6,7 @@ return {
     config = function()
         require("project_nvim").setup({
             -- Detection methods: "lsp", "pattern"
-            detection_methods = { "pattern", "lsp" },
+            detection_methods = { "pattern" },
 
             -- Patterns to detect project root
             patterns = {
