@@ -80,15 +80,22 @@ A personalized Neovim configuration tailored for a streamlined and efficient dev
 | `<leader>rp` | Replay last request |
 | `<leader>rc` | Copy as cURL |
 
-### Search & Replace
+### Search & Navigation
 
 | Key | Action |
 |-----|--------|
-| `<leader>sr` | Open Spectre (project search/replace) |
-| `<leader>sw` | Search current word |
-| `<leader>st` | Search TODOs |
-| `/` | Search in file |
+| `/` | Search in file (highlights all matches) |
 | `n` / `N` | Next/prev search result |
+| `<Esc>` | Clear search highlights |
+| `s` | Flash jump (type chars → label → jump) |
+| `S` | Flash treesitter (select code blocks) |
+| `<leader>/` | Fuzzy search in current buffer |
+| `<leader>fg` | Live grep (search text in all files) |
+| `<leader>fw` | Search word under cursor in all files |
+| `<leader>fr` | Resume last search |
+| `<leader>sr` | Open Spectre (project search/replace) |
+| `<leader>sw` | Search current word (Spectre) |
+| `<leader>st` | Search TODOs |
 
 ### Code Editing
 
@@ -197,6 +204,7 @@ A personalized Neovim configuration tailored for a streamlined and efficient dev
 - **Auto Pairs:** Auto-close brackets and quotes
 - **Modern Folds:** Peek preview with nvim-ufo
 - **Color Picker:** Pick/convert colors with ccc.nvim
+- **Flash Navigation:** Jump anywhere in 2-3 keystrokes with flash.nvim
 
 ## Quick Start
 
@@ -1301,6 +1309,30 @@ Pick, edit, and convert colors in CSS/code.
 | `q` | Cancel |
 
 Supports: HEX, RGB, HSL, HWB, LAB, LCH, OKLCH, CMYK
+
+## Flash (Search & Jump)
+
+Jump anywhere in 2-3 keystrokes. Press `s`, type a few characters, then press the label to jump.
+
+### Keybindings
+
+| Key | Mode | Action |
+|-----|------|--------|
+| `s` | N/V/O | Flash jump (type → label → jump) |
+| `S` | N/V/O | Flash treesitter (select code blocks) |
+| `r` | O | Remote flash (operator pending) |
+| `R` | O/V | Treesitter search |
+| `<C-s>` | `/` search | Toggle flash labels in search |
+| `f/F/t/T` | N | Enhanced motions with labels |
+
+### How It Works
+
+1. Press `s` in normal mode
+2. Type 1-2 characters of where you want to jump
+3. Labels appear on all matches
+4. Press the label letter to jump instantly
+
+Also integrates with `/` search - when you search with `/`, press `<C-s>` to show jump labels on all matches.
 
 ## Project Structure
 
